@@ -75,9 +75,6 @@ class TimeStamp {
   int level = -1;
   std::string name;
 
-  time_ns start_time;
-  time_ns end_time;
-
   StatusBoard status;
 
   std::vector<TimeStamp*> leafstamp;

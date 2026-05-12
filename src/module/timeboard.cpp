@@ -11,7 +11,6 @@ TimeStamp::TimeStamp(std::string name, const StatusBoard& status,
                      TimeStamp* parent, int level)
     : name(name),
       status(status),
-      start_time(start_time),
       parent(parent),
       level(level) {
   leafstamp.resize(0);
