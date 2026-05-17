@@ -1,0 +1,72 @@
+\section{Introduction}
+\label{sec:introduction}
+
+
+Large language models (LLMs) such as GPT-3~\cite{neurips_2020_gpt-3} and GPT-4~\cite{gpt4-techreport} are gaining enormous prominence due to their excellent output quality in a vast range of applications.
+Increasing the number of model parameters has been a principal strategy to improve the quality of an LLM under the premise that the larger the model is, the better the output quality becomes.
+However, such a straightforward scaling approach cannot persist due to the computational challenge.
+
+Recently, LLMs have employed a Mixture-of-Experts (MoE)~\cite{jmlr-2022-switchtransformer, emnlp-2022-metamoe, icml-2022-DSMoE} construction on top of existing models as an efficient method to increase the number of model parameters without severely bloating the computational overhead, enabling faster training time than LLM without MoE.
+The MoE layer replaces the conventional feed-forward network (FFN), mainly composed of matrix-matrix multiplication (GEMM) operations between inputs and trained weights, with a collection of multiple expert FFNs (experts in short) and a gate to choose between experts.
+In \glam~\cite{icml-2022-GLaM}, for example, by utilizing only two out of the total 64 experts, the computational load remains equivalent to a 10B model, achieving the effect of using a 143B model.
+
+
+Adopting continuous batching~\cite{osdi-2022-orca} in inferring LLMs with MoE layers introduces new computational challenges.
+Continuous batching is a state-of-the-art scheduling technique that decomposes each inference request into multiple stages and batches these requests at the stage level in a lockstep manner. 
+It maximizes the utilization of computing resources through fine-grained scheduling, allowing newly arrived requests to participate with minimal queuing delay, thereby increasing throughput. 
+However, this batching strategy also increases the number of experts concurrently used in MoE layers, increasing off-chip memory (DRAM) access for loading the parameters of these experts (e.g., 64 for GLaM).
+Further, the amount of DRAM access in the attention layers in conventional LLMs also increases when batching is applied~\cite{asplos-2024-attacc}. 
+We observed that the MoE and attention layers, which have low arithmetic intensity (\opb) in most stages, take most of the inference time on conventional systems such as GPUs, falling utilization of its computing resources under 10\%.
+
+\begin{figure*}[!tb]
+  \center
+\includegraphics[width=0.76\textwidth]{figures/MoE_GQA_model.pdf}
+  \caption{LLM architecture and inference process in a gen stage with batched requests. Attention and FFN layers compose a conventional LLM, whereas GQA and MoE are used in place of these two layers, respectively.
+  }
+  \vspace{-0.12in}
+  \label{fig:llm_model}
+  \vspace{-0.09in}
+\end{figure*}
+
+
+However, processing an MoE layer only with devices targeting low-\opb cannot handle the fluctuation of \opb in MoE layers by continuous batching.
+Even if the \opb of MoE layers stays at low-\opb in most stages, the arrival of a new request significantly increases the \opb of an MoE layer due to a large number of tokens corresponding to the input sequence passing through the MoE layer.
+Processing these layers solely with devices targeting low-\opb struggle due to insufficient computing power, thereby exacerbating the latency of the MoE layer and deteriorating user experience.
+In such cases, using devices with high computing power (e.g., GPUs) is preferred.
+
+
+A recent work~\cite{asplos-2024-attacc} proposed a heterogeneous system that uses processors targeting low-\opb to alleviate DRAM bandwidth bottleneck in the attention layer and utilizes GPUs to process other layers.
+Replicating MoE layers to both devices and selecting the devices to process the MoE layers based on the \opb values may handle the fluctuation of \opb in MoE layers.
+However, duplicating the parameters of MoE layers, which account for the majority of the model parameters, is inefficient as it requires more devices due to limited memory capacity.
+Such systems also restrict the number of batched requests due to the wasted memory capacity than homogeneous systems, consequently reducing the system throughput. 
+
+
+To address the above challenges in the heterogeneous system, we propose \duplex, which integrates \highp, processing units for high-\opb (e.g., GPU), with \lowp that effectively handles low-\opb operations in LLM inferences.
+Prior works~\cite{isca-2021-hbm-pim, isscc-2022-aim} have suggested processing-in-memory (PIM) for handling extremely low-\opb (around 1) operations.
+As an MoE layer exhibits \opb greater than one, PIM struggles due to its limited computing power.
+%
+Further, the introduction of grouped-query attention (GQA), employed in recent models like Llama 2~\cite{arxiv-2023-llama2} and Mixtral~\cite{arxiv-2024-mixtral}, raises the \opb of attention layers to 4 to 8, making PIM that embeds most ALUs in DRAM dies inefficient for processing the attention layers. 
+The recent trends of decreasing through-silicon via (TSV) pitches to 22um~\cite{SKhynix-tsv-pitch} and implementing a logic die with logic process~\cite{imw-2017-hbm-dram-technology, todaes-2021-nmp-cnn-hbm} make us propose \lowp, adding more TSVs internally to the high bandwidth memory (HBM) and incorporating processors on the logic die to exploit increased internal bandwidth with massive processing units.
+
+
+To enhance the utilization rate of \highp and \lowp, we propose expert and attention co-processing for MoE and attention layers.
+Going further from processing each layer by one of the \highp and \lowp, this co-processing allows the xPU and Logic-PIM to do finer-grained processing within the MoE layer and attention layer.
+We propose expert co-processing that processes the experts utilizing both \highp and \lowp by leveraging the fact that each expert may handle a varying number of tokens and by choosing which processing units to process each expert in the MoE layers.
+We assign experts that process a relatively large number of tokens to \highp and the remaining experts to \lowp, reducing the execution time of the MoE layers.
+We reduce the execution time of the attention layer using attention co-processing that assigns the attention of each request to both processing units, by assigning high-\opb attention operations of an input request to \highp, and low-\opb ones of ongoing requests to \lowp.
+
+By flexibly utilizing proper processing units for each layer based on the \opb and co-processing optimization, \duplex shows up to 2.67$\times$ higher throughput, 2.57$\times$ lower end-to-end latency, and 42.03\% less energy consumption for LLM inference compared to the baseline GPU without \lowp.
+
+The key contributions of this paper are as follows:
+\begin{itemize}[leftmargin=*,nolistsep]
+\item Through a detailed analysis, we observe that GPU systems exhibit fundamental limitations in LLM inference due to their lack of support for low-\opb operations.
+
+
+\item We design \duplex to accelerate MoE and attention layers by housing \highp and \lowp in a single device and selecting the processing units based on the \opb of each layer.
+
+\item We propose \lowp, which incorporates dedicated TSVs connecting the DRAM dies to the logic die where processing units are placed, offering enhanced support for low-\opb (1--32) operations compared to previous PIM architectures.
+
+
+\item We propose expert and attention co-processing to increase the utilization of \highp and \lowp.
+\end{itemize}
+

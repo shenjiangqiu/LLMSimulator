@@ -1,0 +1,183 @@
+\section{Experiments}
+
+% \input{tables/simulation}
+
+\subsection{Settings}
+\label{sec: setting}
+\paragraph{Models.} We evaluate \kivi{} using three popular model families: Llama/Llama-2~\citep{touvron2023llama, touvron2023llama2}, Falcon~\citep{penedo2023refinedweb} and Mistral~\citep{jiang2023mistral}. 
+Llama and Mistral model is based on multi-head attention, while Falcon is based on multi-query attention \citep{mqa}.
+We use the Hugging Face Transformers codebase and implement the \kivi{} algorithm upon it.
+Following previous work \citep{flexgen}, the group size $G$ in Algorithm \ref{algo: kivi} for quantization is set as 32 across all experiments, the residual length $R$ for key and value cache is set to 128.
+
+\paragraph{Tasks.}
+As we analyzed in Section \ref{sec: background}, the KV cache size grows larger with a longer context. 
+Thus, we evaluate \kivi{} under the normal context length and long context setting, respectively.
+Specifically, we adopt generation tasks from LM-Eval~\citep{eval-harness} for normal context length evaluation and LongBench~\citep{bai2023longbench} for long context evaluation, respectively\footnote{The closed-end tasks such as MMLU are not ideal to evaluate \kivi{} since they only involve one decoding step and directly fetch the output logits, which is not suitable for studying the impact of compressed KV cache.}. 
+For LM-eval, we adopt CoQA (Exact match accuracy), TruthfulQA (BLEU score), and GSM8K (Exact match accuracy). 
+For LongBench, we chose tasks from four subgroups. 
+Specifically, Qasper (F1 score) is a Single-Document QA task; QMSum (ROUGE score) and MultiNews (ROUGE score) are Summarization tasks; TREC (classification score), TriviaQA (F1 score), and SAMSum (ROUGE score) are Few-shot Learning tasks; and LCC (similarity score) and RepoBench-P (similarity score) is Code Completion task. The maximum sequence length in LongBench was set to 8192 for the Mistral model and 4096 for other models.
+We also consider the needle-in-a-haystack task (NIAH) to evaluate the model's long context retrieval ability after quantizing KV cache.
+Detailed NIAH setting can be found in Appendix \ref{app: niah}.
+
+\subsection{Accuracy and Efficiency Analysis}
+
+\subsubsection{Comparison Between Different Quantization Configurations}
+
+We first utilize the fake quantization to demonstrate the effectiveness of our asymmetric quantization, namely, quantizing key cache per-channel and value cache per-token. 
+Here fake quantization is exactly the same as in Table \ref{tab:sub_simulation}.
+The results are shown in Table \ref{tab:merged-lm-eval}.
+We observe that ``2bit (K per-channel, V per-token)'' consistently achieves the best results compared to all other configurations.
+This is consistent with our previous analysis.
+We also note that for hard generation tasks such as GSM8K, the fake ``2bit (K per-channel, V per-token)'' quantization results are significantly worse than the full precision counterparts.
+However, for \kivi{} in Table \ref{tab:merged-lm-eval}, we observe that the accuracy drop is only around $2\%$ for GSM8K across different models.
+As we analyzed in Section \ref{sec: algo},
+the difference between fake ``2bit (K per-channel, V per-token)'' quantization and \kivi{} is that \kivi{} maintains a full precision key and value cache sliding window for the local relevant tokens.
+This sliding window is crucial to maintaining accuracy for hard generation tasks such as mathematical reasoning. 
+
+\subsubsection{Accuracy Comparison on Generation Tasks}
+
+\input{tables/merged-lm-eval}
+
+\input{tables/longbench}
+
+\begin{figure*}[h]
+% \vspace{-1em}
+\setlength{\abovecaptionskip}{0mm}
+\setlength{\belowcaptionskip}{0mm}
+\centering
+\subfigcapskip=-2mm
+
+\begin{minipage}{0.95\linewidth}
+    
+\subfigure[\!Llama-3-8B-Instruct Baseline]{
+\centering
+    % \begin{minipage}[t]{0.3\linewidth}
+        \includegraphics[width=0.3\linewidth]{figures/needle/icl_raw_extend/llama.pdf}
+    % \end{minipage}%
+}
+\subfigure[\!Llama-3-8B-Instruct + \kivitwo{}]{
+\centering
+    % \begin{minipage}[t]{0.3\linewidth}
+        \includegraphics[width=0.3\linewidth]{figures/needle/kivi/llama/2_bit.pdf}
+    % \end{minipage}%
+}
+\subfigure[\!Llama-3-8B-Instruct + \kivifour{}]{
+\centering
+    % \begin{minipage}[t]{0.3\linewidth}
+        \includegraphics[width=0.3\linewidth]{figures/needle/kivi/llama/4_bit.pdf}
+    % \end{minipage}%
+}
+
+\subfigure[\!Mistral-7B-Instruct-v0.2 Baseline]{
+\centering
+    % \begin{minipage}[t]{0.3\linewidth}
+        \includegraphics[width=0.3\linewidth]{figures/needle/icl_raw_extend/mistral.pdf}
+    % \end{minipage}%
+}
+\subfigure[\!Mistral-7B-Instruct-v0.2 + \kivitwo{}]{
+\centering
+    % \begin{minipage}[t]{0.3\linewidth}
+        \includegraphics[width=0.3\linewidth]{figures/needle/kivi/mistral/2_bit.pdf}
+    % \end{minipage}%
+}
+\subfigure[\!Mistral-7B-Instruct-v0.2 + \kivifour{}]{
+\centering
+    % \begin{minipage}[t]{0.3\linewidth}
+        \includegraphics[width=0.3\linewidth]{figures/needle/kivi/mistral/4_bit.pdf}
+    % \end{minipage}%
+}
+
+\end{minipage}
+\hspace{-1em}
+\begin{minipage}{0.04\linewidth}
+    \centering
+    \includegraphics[width=1.25\linewidth]{figures/needle/bar2.pdf}
+\end{minipage}
+
+\caption{Needle-in-a-Haystack results on Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2. Here we count the number of words instead of tokens to better account for the tokenizer difference. The final token length is noted in the upper right corners of each figure. Detailed setting can be found in Appendix \ref{app: niah}.}
+\label{fig: needle}
+\end{figure*}
+
+\paragraph{LM-Eval Results.}
+We benchmark \kivi{} in CoQA, TruthfulQA and GSM8K tasks using the LM-Eval framework. All dataset parameters were set to default. We compare the standard 16bit configuration with our \kivi{} compression techniques in Llama-2-7B, Llama-2-13B, Falcon-7B and Mistral-7B. As shown in Table ~\ref{tab:merged-lm-eval}, we observe that for the Llama and Mistral model, \kivi{} only has up to 2\% accuracy drop despite the KV cache being stored in 2bit.
+For instance, in the Llama-2-7B model, the transition from 16bit to 2bit only slightly decreases accuracy. 
+Similar trends are observed in other Llama-family models.
+Since Falcon-7B adopts multi-query attention and only has one head for KV cache, it is already highly compressed compared to Llama-based models.
+Thus, in Table \ref{tab:merged-lm-eval}, 4bit \kivi{} is needed to maintain the accuracy, while 2bit \kivi{} may have a large accuracy drop in this case.
+
+\paragraph{LongBench Results.}
+The performance of \kivi{} over various models in the LongBench dataset is summarised in Table ~\ref{tab:longbench}. We apply \kivi{} to Llama2-7B, Llama2-13B, Llama2-7B-Chat, Llama2-13B-Chat, Falcon-7B and Mistral-7B.
+Table \ref{tab:longbench} suggests that \kivi{} is an effective method for KV cache compression with minimal impact on accuracy across various hard long context generation tasks.
+\textbf{We present additional results using Llama3-8b, Mistral-7B-v0.2, and LongChat-7B-v1.5, which can be found in Appendix~\ref{app: exp}.}
+
+\paragraph{NIAH Results.} From Figure \ref{fig: needle}, we observe that \kivi{} can still maintain the retrieval ability of LLMs even with 2bit KV Cache. 
+Detailed NIAH setting can be found in Appendix \ref{app: niah}.
+
+
+\begin{table}
+\centering
+\small
+\caption{Ablation study of \kivi{} by changing group size $G$ and residual length $R$.}
+% \vspace{-.5em}
+\label{tab:abl}
+\begin{tabular}{lcc} 
+\toprule
+\textbf{Model}                         & \textbf{Group Size} & \textbf{GSM8K}  \\ 
+\midrule
+\multirow{3}{*}{Llama2-13B}  & 32  & 20.77 \\
+                            & 64  & 21.00 \\
+                            & 128 & 17.29\\
+\bottomrule
+\toprule
+\textbf{Model}                         & \textbf{Residual Length} & \textbf{GSM8K}  \\ 
+\midrule
+% \multirow{5}{*}{Llama2-13B}  & 0  & 18.88 \\ 
+ \multirow{4}{*}{Llama2-13B}                            & 32  & 20.62 \\
+                             & 64  & 19.86 \\
+                             & 96  & 20.55\\
+                             & 128 & 20.77\\
+\bottomrule
+\end{tabular}
+\vspace{-1.5em}
+\end{table} 
+
+\subsubsection{Ablation}
+
+In this section, we benchmark \kivi{} on GSM8K, one of the hardest generation tasks, to show the effect of hyperparameters group size $G$ and residual length $R$ on the model performance. For full results of \kivi{} with a residual length of 32, please refer to Appendix~\ref{app: abl}.
+
+\textbf{The effect of group size.} We fix the residual length at 128 and vary the group sizes to 32, 64, and 128. From Table~\ref{tab:abl}, we observe that group sizes 32 and 64 yield similar results, whereas the performance significantly decreases when the group size reaches 128. Note the zero-point and the scaling factor mentioned in Section~\ref{sec: quant prelim} are calculated according to this group size; where the choice of group size will greatly impact the KV cache compression effect under a long input.
+
+\textbf{The effect of residual length.} We fix the group size at 32 and vary the residual length across 32, 64, 96, and 128. As shown in Table~\ref{tab:abl}, 
+there is no consistent pattern between residual lengths and model accuracy.
+Namely, while a residual length of 128 achieves good results, 32 and 96 yield similar outcomes, but a residual length of 64 results in the worst performance. We emphasize that while we observe no significance among residual lengths of $\{32, 96, 128\}$, \textbf{having a reasonably large residual length is important; as it brings much performance boosts on hard tasks like GSM8K, again as shown in Table~\ref{tab:abl}.}
+
+% the performance associated with different residual lengths can be arbitrary; while a residual length of 128 achieves good results, 32 and 96 yield similar outcomes, but a residual length of 64 results in the worst performance.
+
+% As Section~\ref{sec: efficiency} showed, the residual length is important to the efficiency metric. 
+
+
+\begin{figure}
+ % \vspace{-4em}
+  \begin{center}
+    \includegraphics[width=0.39\textwidth]{figures/throughput.pdf}
+  \end{center}
+    \vspace{-1em}
+  \caption{Memory usage and throughput comparison between 2bit \kivi{} and 16bit baseline. \kivi{} can achieve higher throughput by enabling a larger batch size.}
+  \label{fig: throughput}
+\end{figure}
+
+\subsubsection{Efficiency Comparison}
+\label{sec: efficiency}
+
+To evaluate the wall-clock time efficiency of \kivi{},
+following vLLM \citep{vllm}, we synthesize workloads based on ShareGPT \citep{shargpt}, which contain input and output
+texts of real LLM services.
+On average, the data set has an input prompt length $l_{\text{prompt}}$ of 161 and an output length $l_{\text{gen}}$ of 338 \citep{vllm}.
+We increase the batch size until out of memory and report the peak memory usage and throughput between \kivi{} (with residual length 32 and 128) and FP16 baseline for the Llama-2-7B model.
+The hardware here is a single NVIDIA A100 GPU (80GB).
+
+As shown in Figure \ref{fig: throughput}, with similar maximum memory usage, \kivi{} enables up to $\mathbf{4\times}$ larger batch size and gives $\mathbf{2.35\times \sim 3.47\times}$ larger throughput.
+This throughput number can grow larger with longer context length and output length.
+We also note that \textbf{ this speed-up can be greatly increased if we further fuse the KV cache quantization process with previous operations.}
+We leave it as one of future work.
+% Besides the ShareGPT workload, we also report the memory and speed of \kivi with longer context and output length on synthesized workload.

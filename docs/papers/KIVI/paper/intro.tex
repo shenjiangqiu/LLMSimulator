@@ -1,0 +1,72 @@
+\section{Introduction}
+
+Large Language Models (LLMs) have demonstrated strong performance across a wide range of tasks \citep{gpt3,taylor2022galactica,yuan2023large,chuang2024understanding}.
+However, their deployment is very costly, requiring a large number of hardware accelerators such as GPUs.
+Given these substantial costs, one natural way to reduce the cost per request is to combine a sufficient number of requests together for batch processing.
+However, in this batch inference scenario, the key-value cache (KV cache), which holds the attention keys and values during generation to prevent re-computations, is becoming the new memory and speed bottleneck.
+This bottleneck becomes more pronounced with larger batch sizes and longer context lengths. For instance, in 540B PaLM, with a batch size of 512 and a context length of 2048, KV cache alone can take 3TB. This is 3 times the size of the model's parameters \citep{pope2023efficiently}.
+Also, the GPU SRAM has to load the whole KV cache from the GPU device memory for every token generated, during which the computational cores are idle.
+Thus, reducing KV cache size in LLMs while maintaining accuracy is important.
+
+
+Existing works towards this problem can be roughly divided
+into three categories.
+First, some work suggests reducing the number of heads in KV cache, such as multi-query attention \citep{mqa} and multi-group attention \citep{gqa}.
+However, these methods require either training the model from scratch or fine-tuning the existing model.
+Second, another research line reduces KV cache size by evicting unimportant tokens \citep{h2o}.
+Third, some other works try to solve this problem from the system perspective, e.g., offloading KV cache \citep{flexgen} or extending virtual memory and paging techniques into the attention mechanism \citep{vllm}.
+
+To reduce the size of KV cache, the most simple and effective way is to reduce the total bytes taken by KV cache, namely, quantization.
+Unlike the well-studied weight quantization \citep{lin2023awq, xiao2023smoothquant, zhao2024atom}, to the best of our knowledge, only a few studies applied the vanilla 4bit round-to-nearest quantization to KV cache \citep{flexgen, h2o, zhao2024atom} due to the streaming nature of KV cache or other complications.  
+There is a lack of in-depth studies that explore the element distribution of KV cache to understand the hardness and limitation of KV cache quantization.
+To fill the gap, we study the element distribution of KV cache.
+Our analysis suggests: 
+\begin{itemize}
+    \item For key cache, there are a few fixed channels whose magnitudes are very large, which is consistent with previous finding \citep{lin2023awq, xiao2023smoothquant}.
+    Thus, as shown in Figure \ref{fig: quant scheme} right, key cache should be quantized per-channel, i.e., group elements along the channel dimension and quantize them together.
+    In this way,
+   it can confine the error to each individual channel, without impacting the other normal channels.
+     \item For value cache, there is no obvious outlier pattern.
+     Although value cache has no obvious outlier pattern, we experimentally show that it can only be quantized per-token because it is used to calculate the attention output, which is essentially a value cache mixer.
+     As shown in Figure \ref{fig: quant scheme} left,
+     the per-token quantization can confine the error inside each individual token and ensure that the quantization of one token does not adversely impact the others.
+
+\end{itemize}
+
+\begin{figure}
+ % \vspace{-4em}
+  \begin{center}
+    \includegraphics[width=0.35\textwidth]{figures/quant_scheme.pdf}
+  \end{center}
+    \vspace{-1em}
+  \caption{Definition of per-token and per-channel quantization.
+  $\mX\in\mathbb{R}^{l_\text{prompt}\times d}$ is key/value cache where $l_\text{prompt}$ is the number of tokens and $d$ is the number of channels. $z_X$ is the zero-point, $s_X$ is the scaling factor.}
+  \vspace{-1em}
+  \label{fig: quant scheme}
+\end{figure}
+
+
+Based on the above insights, we propose \kivi{}, a plug-and-play extreme low-bit KV cache quantization method.
+\kivi{} quantizes key cache per-channel and quantizes value cache per-token.
+The per-token value cache quantization aligns well with the streaming nature of auto-regressive inference, allowing newly quantized tensors to be directly appended to the existing quantized value cache by token dimension.
+However, for per-channel key cache quantization, the quantization process spans different tokens, which cannot be directly implemented in this streaming setting.
+Since the number of tokens in key cache can be arbitrary, 
+our key idea is to split key cache into two parts.
+The \textbf{first} part is the grouped key cache, which contains several groups of tokens and each group has a certain number of tokens.
+The \textbf{second} part is the residual key cache, which does not have a sufficient number of tokens to form a complete group.
+Similarly, we split value cache into the grouped and residual parts to maintain the accuracy.
+We only apply group-wise quantization to the grouped key cache and value cache, while the residual key cache and value cache are kept in full precision.
+The grouped and residual parts can be combined using tiled matrix multiplication when computing attention scores.
+Our contributions are summarized as follows:
+
+\begin{itemize}
+    \item \textbf{Extensive analysis regarding the outlier patterns and quantization error of KV cache in commonly-used LLMs}.
+    Our observations suggest that key cache should be quantized per-channel and value cache should be quantized per-token.
+We also explain in depth why these caches require different quantization approaches.
+
+     \item \textbf{A new plug-and-play 2bit KV cache quantization algorithm without any fine-tuning, \kivi{}, with hardware-friendly implementation.}
+     We conduct an extensive evaluation for \kivi{} with Llama, Mistral, and Falcon on popular generation tasks.
+    \kivi{} can efficiently compress KV cache to 2bit and bring $\mathbf{2.6\times}$ peak memory usage reduction for Llama-2-7B, with little to no accuracy drop.
+    With our efficient system implementation, this memory reduction, in return, enables up to $\mathbf{4\times}$ larger batch size and brings $\mathbf{2.35\times \sim 3.47\times}$ throughput. 
+
+\end{itemize}

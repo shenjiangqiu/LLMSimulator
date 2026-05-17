@@ -1,0 +1,8 @@
+\section{Conclusion}
+\label{sec:conclusion}
+In this paper, we have proposed \duplex, a device to efficiently accelerate large language models (LLMs).
+We observed that low-\opb operations dominate the total execution time in LLMs and that utilizing heterogeneous systems following prior work would result in severe performance degradation.
+\duplex integrates two types of processing units that share device memories, each designed to efficiently handle high-\opb and low-\opb layers in an LLM.
+Especially, we introduced an alternative processing-in-memory (PIM) microarchitecture, \lowp, that exploits the increased TSV density of contemporary HBM to place powerful processing units on the logic die of an HBM.
+We proposed expert and attention parallel execution to maximize the utilization of processing units in \duplex.
+By these means, \duplex shows up to 2.67$\times$ higher throughput and 42.03\% less energy consumption, achieving 2.07$\times$ higher throughput and 28.19\% lower energy consumption on average for LLM inference compared to a GPU system using H100.

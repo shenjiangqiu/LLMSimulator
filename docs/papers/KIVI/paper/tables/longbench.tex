@@ -1,0 +1,37 @@
+\begin{table*}[t]
+\centering
+\caption{Performance evaluation of \kivi{} on various models across a range of benchmarks in LongBench. We highlight the average performance of our method.
+\textbf{More similar results on Mistral-7B-v0.2 and LongChat-7b-v1.5 can be found in Table \ref{table:longchat} and Table \ref{table:mistral}}}
+\label{tab:longbench}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{llccccccccc} 
+\toprule
+\multicolumn{2}{l}{\textbf{Model}}    & \textbf{Qasper} & \textbf{QMSum} & \textbf{MultiNews} & \textbf{TREC} & \textbf{TriviaQA} & \textbf{SAMSum} & \textbf{LCC} & \textbf{RepoBench-P} & \textbf{Average}  \\ 
+\midrule
+\multirow{3}{*}{Llama2-7B}      & 16bit  & 9.52 & 21.28 & 3.51 & 66.00 & 87.72 & 41.69 & 66.66 & 59.82 & 44.52  \\
+                                & \kivifour{} & 9.28 & 21.42 & 3.88 & 66.00 & 87.72 & 41.82 & 66.80 & 59.83 & 44.59\\
+                                & \kivitwo{} & 9.31 & 20.50 & 1.14 & 66.00 & 87.42 & 42.71 & 66.88 & 60.23 & \textbf{44.27} \\
+\midrule
+\multirow{3}{*}{Llama2-13B}     & 16bit  & 9.32 & 21.38 & 3.71 & 70.00 & 87.87 & 43.55 & 66.61 &56.42 & 44.85 \\
+                                & \kivifour{} & 9.16 & 20.86 & 3.21 & 69.00 & 86.97 & 44.26 & 65.30 & 57.08 & 44.48\\
+                                & \kivitwo{} & 8.58 & 20.69 & 6.19 & 69.50 & 87.78 & 44.30 & 65.08 & 55.46 & \textbf{44.69} \\
+\midrule
+\multirow{3}{*}{Llama2-7B-Chat} & 16bit  & 19.65 & 20.54 & 26.36 & 63.00 & 84.28 & 41.12 & 59.75 & 52.93 & 45.95 \\
+                                & \kivifour{} & 19.62 & 20.70 & 25.49 & 63.00 & 84.13 & 40.87 & 59.27 & 53.56 & 45.83\\
+                                & \kivitwo{} & 19.32 & 20.46 & 25.48 & 63.00 & 84.84 & 40.60 & 58.71 & 52.97 & \textbf{45.67} \\
+\midrule
+\multirow{3}{*}{Llama2-13B-Chat} & 16bit  & 24.18 & 20.37 & 25.69 & 67.50 & 86.90 & 42.18 & 50.23 & 50.64 & 45.96 \\
+                                & \kivifour{} & 23.00 & 20.36 & 26.06 & 67.50 & 87.20 & 42.04 & 52.55 & 52.77 & 46.44\\
+                                 & \kivitwo{} & 23.59 & 20.76 & 25.25 & 67.5 & 87.17 & 41.56 & 49.93 & 48.45 & \textbf{45.52} \\
+\midrule
+\multirow{3}{*}{Falcon-7B}      & 16bit  & 1.48 & 2.35 & 11.09 & 13.00 & 5.84 & 2.44 & 23.86 & 9.69 & 8.71 \\
+                                & \kivifour{} & 1.04 & 2.41 & 11.98 & 13.00 & 5.84 & 2.36 & 23.72 & 9.92 & \textbf{8.78} \\
+                                & \kivitwo{} & 1.98 & 3.61 & 6.78 & 10.00 & 6.24 & 2.73 & 22.18 & 10.12 & \textbf{7.95} \\
+\midrule
+\multirow{3}{*}{Mistral-7B}     & 16bit  & 8.12 & 19.98 & 19.99 & 67.50 & 89.80 & 41.69 & 66.59 & 58.99 & 46.58 \\
+                                & \kivifour{} & 7.89 & 20.06 & 20.58 & 67.50 & 89.80 & 41.56 & 66.45 & 58.62 & 46.56 \\
+                                & \kivitwo{} & 6.92 & 19.71 & 17.92 & 66.50 & 89.63& 41.66 & 65.52 & 58.99 & \textbf{45.85} \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}

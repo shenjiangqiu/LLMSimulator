@@ -1,0 +1,225 @@
+\onecolumn
+\section{Detailed Implementations}
+\label{app: implement}
+
+In this section, we present the algorithm for \kivi{} as discussed in Section~\ref{sec: algo}. Specifically, we provide the pseudocode for \kivi{} when calculating the attention output in the prefill and decoding phases.
+
+\begin{algorithm}[h!]  
+ \SetKwInput{KwParam}{parameter}
+ \KwParam{group size $G$, residual length $R$}
+  \SetKwProg{myProcedure}{procedure}{\string:}{end procedure}
+  \SetKwProg{myFunc}{function}{\string:}{end function}
+  \myProcedure{\FuncSty{Prefill}}{
+\KwIn{$\mX\in{\mathbb{R}^{l_{\text{prompt}}\times d}}$}
+  $\mX_K = \mX \mW_K, \mX_V = \mX \mW_V$ \\
+    $\mX_{V_g}=\mX_V[:l_{\text{prompt}}-R], \mX_{V_r}=\mX_V[l_{\text{prompt}}-R:]$ \\
+    $Q(\mX_{V_g}) \leftarrow$ GroupQuant$(\mX_{V_g}, \text{dim=token}, \text{numGroup=$d//G$})$ \\
+    $Q(\mX_{K_g}), \mX_{K_r} \leftarrow \FuncSty{KeyQuant}(\mX_K)$ \\
+    \texttt{KV cache} $\leftarrow Q(\mX_{K_g}), \mX_{K_r}, Q(\mX_{V_g}), \mX_{V_r}$ \\
+    \Return{$\mX_K, \mX_V$}
+  }
+    \myProcedure{\FuncSty{Decoding}}{
+      \KwIn{\texttt{KV cache}, $\vt\in{\mathbb{R}^{1\times d}}$}
+$\vt_Q = \vt \mW_Q, \vt_K = \vt \mW_K, \vt_V = \vt \mW_V$ \\
+$Q(\mX_{K_g}), \mX_{K_r}, Q(\mX_{V_g}), \mX_{V_r} \leftarrow\texttt{KV cache}$ \\ 
+$\mX_{K_r}\leftarrow \text{Concat}([\mX_{K_r}, \vt_K], \text{dim=token})$\\
+$\mX_{V_r}\leftarrow \text{Concat}([\mX_{V_r}, \vt_V], \text{dim=token})$\\
+\If{$\text{len}(\mX_{K_r})=R$}{
+    $Q(\mX_{K_r}), \_ \leftarrow$\FuncSty{KeyQuant}($\mX_{K_r}$)\\
+    $Q(\mX_{K_g})\leftarrow \text{Concat}([Q(\mX_{K_g}), Q(\mX_{K_r})], \text{dim=token})$ \\
+    $\mX_{K_r}\leftarrow$ empty tensor.
+}
+\If{$\text{len}(\mX_{V_r})>R$}{
+    $Q(\mX_{V_r'}) \leftarrow$ GroupQuant$(\mX_{V_r}[:-R], \text{dim=token}, \text{numGroup}=d//G)$ \\
+    $Q(\mX_{V_g})\leftarrow \text{Concat}([Q(\mX_{V_g}), Q(\mX_{V_r'})], \text{dim=token})$ \\
+    $\mX_{V_r} \leftarrow \mX_{V_r}[-R:]$
+}
+$\mA \leftarrow \text{Concat}([\vt_Q Q(\mX_{K_g})^\top, \vt_Q \mX_{K_r}^\top], \text{dim=token})$\\
+$\mA_g = \text{Softmax}(\mA)[:-R], \mA_r = \text{Softmax}(\mA)[-R:]$ \\
+$\vt_O \leftarrow \mA_g Q(\mX_{V_g}) + \mA_r \mX_{V_r}$  \\
+\texttt{KV cache} $\leftarrow Q(\mX_{K_g}), \mX_{K_r}, Q(\mX_{V_g}), \mX_{V_r}$ \\
+\Return{$\vt_O$}
+  }
+  
+    \myFunc{\FuncSty{KeyQuant}($\mX_K\in\mathbb{R}^{l\times d}$)}{
+  $ r = l \% R$, \\
+  $\mX_{K_g}=\mX_K[:l-r], \mX_{K_r}=\mX_K[l-r:]$ \\
+  $Q(\mX_{K_g}) \leftarrow$ GroupQuant$(\mX_{K_g}, \text{dim=channel}, \text{numGroup=$l // G$})$ \\
+  \Return{$Q(\mX_{K_g}), \mX_{K_r}$}
+  }
+  \caption{The \kivi{} Prefill \& Decoding Algorithm}
+  \label{algo: kivi}
+\end{algorithm}
+
+\newpage
+\section{NIAH Setting}
+\label{app: niah}
+
+We largely follows the passkey retrieval prompt template of \citet{mohtashami2023passkey} but using 7-digit passkey and Paul Graham Essays\footnote{\url{https://paulgraham.com/articles.html}} as the background filler, as set forth in \href{https://github.com/gkamradt/LLMTest_NeedleInAHaystack}{Arize-ai} and \citet{reid2024gemini}:
+
+\noindent {\small\texttt{There is an important info hidden inside a lot of irrelevant text.  Find it and memorize them.  I will quiz you about the important information there.}}
+
+\noindent {\small\texttt{<prefix filled by Paul Graham Essays>}}
+
+\noindent {\small\texttt{The pass key is <7-DIGIT PASS KEY>.  Remember it. <7-DIGIT PASS KEY> is the pass key.}}
+
+\noindent {\small\texttt{<suffix filler>}}
+
+\noindent {\small\texttt{What is the pass key?  The pass key is}}
+
+
+\section{More Ablation Results}
+\label{app: abl}
+
+In our efficiency evaluation, we observe that with a residual length of 32, \kivi{} achieves a significantly higher memory compression rate, which in turn leads to increased throughput. Additionally, our ablation study reveals that changing the residual length from 128 to 32 does not result in a substantial performance gap. We demonstrate \kivi{} with a residual length of 32 across all benchmark datasets. As shown in Tables~\ref{tab: abl lmeval} and~\ref{tab: abl longbench}, \kivi{} with a residual length of 32 also delivers performance comparable to that of the 16-bit full model.
+
+\begin{table}[h!]
+\centering
+\caption{Performance comparison between 16bit, \kivitwo{} (2bit) / \kivifour{} (4bit) with residual length 128 and 32 across various models. $R32$ stands for residual length 32.}
+\label{tab: abl lmeval}
+\resizebox{0.6\linewidth}{!}{
+\begin{tabular}{llccc} 
+\toprule
+\multicolumn{2}{l}{\textbf{Model}}        & \textbf{CoQA} & \textbf{TruthfulQA} & \textbf{GSM8K}  \\
+\midrule
+\multirow{3}{*}{Llama-2-7B}  & 16bit  &     63.88      &         30.76        &   13.50     \\
+& \kivitwo{} $R128$ &  63.05  & 33.95  &   12.74 \\
+& \kivitwo{} $R32$ &   62.85 & 33.01 & 13.57 \\
+\midrule
+\multirow{3}{*}{Llama-2-13B} & 16bit  &      66.37     &        29.53        &   22.67      \\
+ & \kivitwo{} $R128$ & 66.23 & 29.84  & 20.77 \\
+ & \kivitwo{} $R32$ & 66.57 & 29.35 & 20.62\\
+\midrule
+\multirow{5}{*}{Falcon-7B}   & 16bit  &     59.83   &   23.20    &        4.55          \\
+ & \kivifour{} $R128$ &                         59.67 & 22.58 & 4.47 \\
+ & \kivifour{} $R32$ &                         59.73 & 22.96 & 3.94\\
+ & \kivitwo{} $R128$ &                              57.48 & 24.98 & 3.41 \\
+ & \kivitwo{} $R32$ &                          57.50 & 25.70 & 2.20 \\
+\midrule
+\multirow{3}{*}{Mistral-7B}   & 16bit  &     67.40  &  30.45  &  38.36     \\
+ & \kivitwo{} $R128$ & 66.35 & 32.17 & 36.01  \\
+ & \kivitwo{} $R32$ &  65.90 & 31.21 & 34.34\\
+\bottomrule
+
+\end{tabular}
+}
+\end{table}
+
+\begin{table*}[h!]
+\centering
+\caption{Performance evaluation of \kivi{} with residual length 128 and 32 on various models across a range of benchmarks in LongBench. $R32$ stands for residual length 32.}
+\label{tab: abl longbench}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{llccccccccc}
+\toprule
+\multicolumn{2}{l}{\textbf{Model}}    & \textbf{Qasper} & \textbf{QMSum} & \textbf{MultiNews} & \textbf{TREC} & \textbf{TriviaQA} & \textbf{SAMSum} & \textbf{LCC} & \textbf{RepoBench-P} & \textbf{Average}  \\ 
+\midrule
+\multirow{3}{*}{Llama2-7B}      & 16bit  & 9.52 & 21.28 & 3.51 & 66.00 & 87.72 & 41.69 & 66.66 & 59.82 & 44.52  \\
+                                & \kivitwo{} $R128$ & 9.31 & 20.50 & 1.14 & 66.00 & 87.42 & 42.71 & 66.88 & 60.23 & 44.27 \\
+                                & \kivitwo{} $R32$ & 9.26 & 20.53 & 0.97 & 66.00 & 87.42 & 42.61 & 66.22 & 59.67 & 44.08\\
+\midrule
+\multirow{3}{*}{Llama2-13B}     & 16bit  & 9.32 & 21.38 & 3.71 & 70.00 & 87.87 & 43.55 & 66.61 &56.42 & 44.85 \\
+                                & \kivitwo{} $R128$ & 8.58 & 20.69 & 6.19 & 69.50 & 87.78 & 44.30 & 65.08 & 55.46 & 44.69 \\
+                                & \kivitwo{} $R32$ & 8.38 & 20.74 & 7.01 & 69.50 & 87.78 & 44.43 & 64.89 & 55.31 & 44.75 \\
+\midrule
+\multirow{3}{*}{Llama2-7B-Chat} & 16bit  & 19.65 & 20.54 & 26.36 & 63.00 & 84.28 & 41.12 & 59.75 & 52.93 & 45.95 \\
+                                & \kivitwo{} $R128$ & 19.32 & 20.46 & 25.48 & 63.00 & 84.84 & 40.60 & 58.71 & 52.97 & 45.67 \\
+                                & \kivitwo{} $R32$ & 19.10 & 20.08 & 25.33 & 63.00 & 85.04 & 39.80 & 57.91 & 52.38 & 45.33 \\
+\midrule
+\multirow{3}{*}{Llama2-13B-Chat} & 16bit  & 24.18 & 20.37 & 25.69 & 67.50 & 86.90 & 42.18 & 50.23 & 50.64 & 45.96 \\
+                                 & \kivitwo{} $R128$ & 23.59 & 20.76 & 25.25 & 67.50 & 87.17 & 41.56 & 49.93 & 48.45 & 45.52 \\
+                                 & \kivitwo{} $R32$ & 23.56 & 20.90 & 25.45 & 67.50 & 87.42 & 41.40 & 48.93 & 48.81 & 45.49 \\
+\midrule
+\multirow{5}{*}{Falcon-7B}      & 16bit  & 1.48 & 2.35 & 11.09 & 13.00 & 5.84 & 2.44 & 23.86 & 9.69 & 8.71 \\
+                                & \kivifour{} $R128$ & 1.04 & 2.41 & 11.98 & 13.00 & 5.84 & 2.36 & 23.72 & 9.92 & 8.78 \\
+                                & \kivifour{} $R32$ & 1.03 & 2.45 & 11.99 & 13.50 & 5.84 & 2.46 & 23.88 & 9.95 & 8.88 \\
+                                & \kivitwo{} $R128$ & 1.98 & 3.61 & 6.78 & 10.00 & 6.24 & 2.73 & 22.18 & 10.12 & 7.95 \\
+                                & \kivitwo{} $R32$ & 2.28 & 3.23 & 6.73 & 10.00 & 6.31 & 2.88 & 22.71 & 10.45 & 8.07 \\
+\midrule
+\multirow{3}{*}{Mistral-7B}     & 16bit  & 8.12 & 19.98 & 19.99 & 67.50 & 89.80 & 41.69 & 66.59 & 58.99 & 46.58 \\
+                                & \kivitwo{} $R128$ & 6.92 & 19.71 & 17.92 & 66.50 & 89.63 & 41.66 & 65.52 & 58.99 & 45.85 \\
+                                & \kivitwo{} $R32$ & 6.84 & 19.81 & 17.20 & 66.50 & 89.63 & 42.82 & 65.13 & 58.06 & 45.74 \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+
+\section{More Experimental Results}
+\label{app: exp}
+
+We present additional results using Llama3-8B, Mistral-7B-v0.2, and LongChat-7B-v1.5 in LongBench, which can be found in Table~\ref{table:llama3}, Table~\ref{table:mistral} and Table~\ref{table:longchat}, respectively.
+
+We also show result of Needle-in-a-Haystack Test in Figure~\ref{fig: needle}. The settings largely follow the format of the original passkey retrieval task \citep{mohtashami2023passkey} while including some modern modifications set forward by \href{https://github.com/gkamradt/LLMTest_NeedleInAHaystack}{Arize-ai} and the technical report of Gemini 1.5 \citep{reid2024gemini}.
+
+\begin{table*}[h]
+\centering
+\caption{The results of Llama-3-8B-Instruct with \kivi{} on LongBench.
+The model has 8K context length and applies group query attention, which uses 8 heads for KV cache instead of the full 32 heads. We use a 32 group size and 128 residual length for both \kivitwo{} and \kivifour{}. The baseline is of full precision.}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lcccccccc}
+\toprule
+ &  \textbf{NarrativeQA} & \textbf{Qasper} & \textbf{MultiFieldQA} & \textbf{HotpotQA} & \textbf{MuSiQue} & \textbf{2WikiMQA} & \textbf{GovReport} & \textbf{QMSum} \\
+\midrule
+Baseline & 21.71 & 44.24 & 44.54 & 46.82 & 21.49 & 36.42 & 30.03 & 22.67 \\
+w./ \kivitwo{} & 21.35 & 43.17 & 44.49 & 46.79 & 20.56 & 37.05 & 29.98 & 22.07  \\
+w./ \kivifour{} & 21.01 & 44.83 & 44.60 & 46.96 & 21.43 & 36.48 & 30.22 & 22.44  \\ 
+\midrule
+ & \textbf{MultiNews} & \textbf{LCC} & \textbf{RepoBench-P} & \textbf{TriviaQA} & \textbf{SAMSum} & \textbf{TRec} & \textbf{PR} & \textbf{Avg} \\
+\midrule
+Baseline & 27.79 & 57.00 & 51.22 & 90.23 & 42.53 & 74.50 & 67.00 & 45.21 \\
+w./ \kivitwo{} & 27.77 & 50.84 & 46.65 & 90.54 & 42.26 & 74.50 & 67.50 & 44.37 \\
+w./ \kivifour{} & 27.97 & 57.36 & 52.03 & 90.33 & 42.97 & 74.50 & 66.50 & 45.31 \\ 
+\bottomrule
+\end{tabular}
+}
+\label{table:llama3}
+\end{table*}
+
+\begin{table*}[h]
+\centering
+\caption{The results of Mistral-7B-Instruct-v0.2 with \kivi{} on LongBench.
+The model has 32K context length and applies group query attention, which uses 8 heads for KV cache instead of the full 32 heads. We use a 32 group size and 128 residual length for both \kivitwo{} and \kivifour{}. The baseline is of full precision.}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lcccccccc}
+\toprule
+ &  \textbf{NarrativeQA} & \textbf{Qasper} & \textbf{MultiFieldQA} & \textbf{HotpotQA} & \textbf{MuSiQue} & \textbf{2WikiMQA} & \textbf{GovReport} & \textbf{QMSum} \\
+\midrule
+Baseline & 21.02 & 29.41 & 47.13 & 36.53 & 19.13 & 21.76 & 32.59 & 23.99 \\
+w./ \kivitwo{} & 20.61 & 28.73 & 44.88 & 35.47 & 17.95 & 20.68 & 32.55 & 23.65 \\
+w./ \kivifour{} & 20.97 & 29.41 & 46.52 & 36.25 & 19.53 & 21.66 & 32.97 & 24.06 \\ 
+\midrule
+ & \textbf{MultiNews} & \textbf{LCC} & \textbf{RepoBench-P} & \textbf{TriviaQA} & \textbf{SAMSum} & \textbf{TRec} & \textbf{PR} & \textbf{Avg} \\
+\midrule
+Baseline & 27.09 & 53.49 & 51.40 & 86.23 & 43.04 & 71.00 & 89.33 & 43.54 \\
+w./ \kivitwo{} & 26.54 & 53.03 & 51.16 & 86.00 & 43.34 & 71.00 & 80.83 & 42.43 \\
+w./ \kivifour{} & 26.89 & 53.33 & 51.41 & 86.23 & 43.34 & 71.00 & 89.42 & 43.53 \\ 
+\bottomrule
+\end{tabular}
+}
+\label{table:mistral}
+\end{table*}
+
+\begin{table*}[h]
+\centering
+\caption{The results of LongChat-7B-v1.5-32K with \kivi{} on LongBench.
+The model has 32K context length. We use a 32 group size and 128 residual length for both \kivitwo{} and \kivifour{}. The baseline is of full precision.}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lcccccccc}
+\toprule
+  &  \textbf{NarrativeQA} & \textbf{Qasper} & \textbf{MultiFieldQA} & \textbf{HotpotQA} & \textbf{MuSiQue} & \textbf{2WikiMQA} & \textbf{GovReport} & \textbf{QMSum} \\ 
+\midrule
+Baseline & 20.65 & 29.42 & 43.15 & 33.05 & 14.66 & 24.14 & 30.85 & 22.84 \\
+w./ \kivitwo{} & 20.79 & 28.69 & 41.02 & 32.91 & 13.82 & 23.00 & 30.47 & 22.59 \\
+w./ \kivifour{} & 20.49 & 28.90 & 43.24 & 33.07 & 14.66 & 24.86 & 31.40 & 22.84 \\ 
+\midrule
+ & \textbf{MultiNews} & \textbf{LCC} & \textbf{RepoBench-P} & \textbf{TriviaQA} & \textbf{SAMSum} & \textbf{TRec} & \textbf{PR} & \textbf{Avg} \\ 
+\midrule
+Baseline & 26.55 & 54.83 & 58.94 & 83.99 & 40.75 & 66.50 & 30.50 & 38.72 \\
+w./ \kivitwo{} & 26.28 & 54.11 & 57.62 & 83.19 & 41.28 & 66.50 & 32.25 & 38.30 \\
+w./ \kivifour{} & 26.52 & 54.06 & 58.77 & 83.88 & 40.62 & 67.00 & 31.50 & 38.79 \\ 
+\bottomrule
+\end{tabular}
+}
+\label{table:longchat}
+\end{table*}

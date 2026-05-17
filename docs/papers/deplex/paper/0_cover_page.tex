@@ -1,0 +1,338 @@
+%\section{0_cover_page}
+\label{sec:0_cover_page}
+
+We appreciate the reviewers' constructive comments. 
+%
+Below, we address each reviewer's comments. 
+%
+Click on the blue hyperlink, such as `\ref{sec:introduction}' to jump to the corresponding section.
+%
+%We color the revised parts of the manuscript in blue.
+%
+\rule[0.5ex]{8.8cm}{2pt}
+
+\begin{center}
+    \large \textbf{Common concerns}
+\end{center}
+
+\noindent
+\rule[0.5ex]{8.8cm}{2pt}
+
+\noindent
+\textbf{[\#A/\#D] Performance analysis in other scenarios without MoE or GQA}
+%
+
+In server-oriented LLM inference acceleration systems, it is more efficient to process the requests in continuous batching, thereby increasing throughput. 
+Therefore, we assumed continuous batching as the default approach.
+To analyze the performance improvement of \duplex in LLMs without MoE or GQA, we added experiments with Llama3-70B (non-MoE, GQA) and OPT-66B (non-MOE, MHA).
+The details of models are added to Section~\ref{sec:experimental_setup} and evaluation results are included in Section~\ref{sec:eval:compare_pim} and Fig.~\ref{fig:eval_ablation_study_pim}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#A/\#E] Comparison with the prior PIM designs}
+%
+
+To fairly compare the performance with the prior PIM designs~\cite{isca-2021-hbm-pim, isscc-2022-aim, asplos-2024-attacc, asplos-2024-neupim}, we replaced our \lowp with HBMs that incorporate a processing unit at each bank and compared it with \duplex.
+We added the evaluation results to Section~\ref{sec:eval:compare_pim} and Fig.~\ref{fig:eval_ablation_study_pim}.
+We revised Section~\ref{sec:related_work} to discuss the differences between \duplex and TOP-PIM.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+
+\noindent
+\textbf{[\#A/\#E] Performance evaluation in varying QPS scenarios}
+%
+
+To verify the performance improvements of \duplex in real-world scenarios, we conducted experiments by varying the queries per second (QPS).
+We added experiments in Section~\ref{sec:eval:duplex_latency} and Fig.~\ref{fig:eval_qps}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#B/\#E] How to schedule experts in co-processing}
+%
+
+We detailed the expert-scheduling technique using a lookup table in Section~\ref{sec:duplex_co-processing}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{2pt}
+
+\begin{center}
+    \large \textbf{Individual concerns}
+\end{center}
+
+\noindent
+\rule[0.5ex]{8.8cm}{2pt}
+
+
+\noindent
+\textbf{[\#A-1] Details of the datasets and traces}
+%
+
+We added the details of the datasets and traces in Section~\ref{sec:experimental_setup}.
+Also, we conducted the experiments when \lin is very long but \lout is short.
+The evaluation results are in Section~\ref{sec:eval:duplex_latency} and Fig.~\ref{fig:eval_qps}.
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\noindent
+\textbf{[\#A-2] Comparing the accuracy of GQA and MQA}
+%
+
+We cited prior studies~\cite{2023-arxiv-gqa, 2023-arxiv-llama2} showing that MQA has lower accuracy compared to GQA in Section~\ref{sec:background:moe_gqa}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#A-3] Confusion in Fig.~\ref{fig:duplex_job_distribution} and Fig.~\ref{fig:duplex_operation_flow}}.
+
+The colored boxes in Fig.~\ref{fig:duplex_job_distribution} indicate which HBM stores the weight partition.
+The shaded boxes in Fig.~\ref{fig:duplex_operation_flow} are used to distinguish different mini-batches.
+We revised Fig.~\ref{fig:duplex_job_distribution} and Fig.~\ref{fig:duplex_operation_flow} and added more description.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#B-1] In the case the KV cache does not fit into the capacity of \duplex}
+%
+
+If the intermediate KV cache for the specified batch size and input/output lengths cannot be stored, we reduce the batch size to ensure that all data can be stored within the memory capacity of \duplex in the evaluation, where we denoted the decreased batch size in the figure.
+If this is not the case, \duplex can use techniques such as KV cache migration or recomputation proposed in \cite{sosp-2023-pagedattention}.
+We added the details in Section~\ref{sec:discussion:kvcache}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#B-2] Confusion in Fig.~\ref{fig:duplex_operation_flow}(d)}
+%
+
+In general, (non-MoE) FFNs do not account for a large part of MoE LLMs. 
+However, the blue bars in Fig.~\ref{fig:duplex_operation_flow} represent the processing of each expert in the MoE layer.
+Fig.~\ref{fig:duplex_operation_flow}(d) shows the scenario where experts selected by a relatively small number of tokens in the MoE layer are processed using \lowp. 
+To avoid confusion, we revised Fig.~\ref{fig:duplex_operation_flow} for better clarity.
+%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#B-3] Different numbers in abstract and conclusion}
+%
+
+We revised them clearly.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#C-1] Details of the simulation modeling}
+
+For simulation, we used Ramulator~\cite{cal-2023-ramulator2} to calculate the timing data for the HBM and \lowp using the parameter specified in the JEDEC standard~\cite{jedec-hbm3}.
+The synthesized computing units, such as GEMM modules, were integrated into the simulator by calculating the timing data for operations based on their synthesized frequency and the number of units. 
+Using this data, the simulator determines the total execution time for the layers.
+We added the details of the simulator in Section~\ref{sec:experimental_setup}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#C-2] DRAM technology and scaling methodology}
+
+To measure the area overhead when the processing units are implemented using DRAM processes, we first synthesized them using a 7 nm predictive process design kit~\cite{asap7-2016}. 
+We then scaled the area overhead to 1z-nm DRAM technology and applied a scaling factor of 10, considering the inefficiencies of implementing logic units using the DRAM process~\cite{hotchips-2019-upmem}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#C-3] Energy trend between various batch sizes}
+%
+
+We detailed the analysis of energy trends in varying batch sizes in Section~\ref{sec:eval:energy}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#C-4] Explanation of Mixture of Experts decoder blocks}
+%
+
+We added an additional explanation of the Mixture of Experts decoder blocks in Section~\ref{sec:background:moe_gqa}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+
+\noindent
+\textbf{[\#D-1] More background for the prior PIM design}
+%
+
+In conventional memory systems, because the banks in one pseudo-channel share the data path, only one bank can send data at a time. 
+The prior PIM designs place internal computing units in each bank (or two banks) on the DRAM die, enabling simultaneous reading of data from multiple banks.
+Simultaneous operation of banks has been proposed in many prior works~\cite{isca-2021-hbm-pim, isscc-2022-aim, asplos-2024-attacc, asplos-2024-neupim}. 
+The main idea of \duplex is to place the computing units on the logic layer, which uses an efficient logic process, rather than implementing them in the inefficient DRAM process for handling low Op/B operations. 
+Further, \duplex increases the number of TSVs between the DRAM die and the logic layer, allowing for amplified memory bandwidth.
+To retrieve data from the DRAM die four times faster, we grouped banks into a \bankbundle and operated the \bankbundle simultaneously.
+We added more details of the prior PIM design in Section~\ref{sec:duplex_implement_low_opb}.
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#D-2] Terminology}
+%
+
+Thank you for your feedback. We change the terms `summarization' to `prefill' and `generation' to `decoding,' respectively.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#E-1] Split prefill and decoding}
+%
+
+When splitting the prefill and decoding nodes like Splitwise~\cite{arxiv-2024-splitwise}, it has the benefit of low tail latency in \tbt compared to a non-split system.
+However, it suffers from matching the utilization between prefill and decoding nodes.
+Additionally, the model weights must be duplicated to both prefill and decoding nodes, which limits the batch size and degrades throughput.
+We added the evaluation and the discussions to compare the performance of split versus non-split systems using \duplex in Section~\ref{sec:discussion:splitwise} and Fig.~\ref{fig:split_duplex}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#E-2] Performance in a large system}
+%
+
+In \grok, which uses two nodes (total 16 devices) due to its large model size, \duplex has less performance gain than that of smaller models due to communication overhead caused by the relatively low bandwidth between nodes, but still shows noticeable performance gains.
+We detailed this description in Section~\ref{sec:eval:duplex_throughput}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#E-3] Misleading writing in Section~\ref{sec:motivation:hetero_limitations}}
+%
+
+We apologize our misleading writing in Section~\ref{sec:motivation:hetero_limitations}.
+First, we assumed the heterogeneous systems consist of two GPUs and two \lowp, and the \lowp processes all MoE layers regardless of the stage. In this case, heterogeneous systems suffer from excessive tail \tbt latency and median \ttft latency due to the low computing power of \lowp in a \mixedstage.
+To mitigate the excessive latency, such systems have to duplicate the weights of the MoE layers to GPUs and perform the MoE layers of the \mixedstage using GPUs.
+However, duplicating the weights of the MoE layers, which dominate the total model weights, limits the batch size, degrading the system's throughput.
+We revised the misleading writing in Section~\ref{sec:motivation:hetero_limitations}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#E-4] Batch size of the mini-batch case in Fig.~\ref{fig:duplex_operation_flow}}
+%
+
+Assuming the same total device memory and considering the KV cache that increases proportionally with the batch size, all cases (a)-(d) have the same maximum batch size. Thus, we unified the effective total batch size to N.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#E-5] More experiments}
+%
+
+We appreciate your detailed feedback.
+We conducted experiments by varying the QPS.
+To compare related works with \duplex, we defined \bankpim and added performance comparison experiments across various models (with and without MoE, GQA, and MHA). 
+We also provided a more detailed description of the reasons for performance increases or decreases based on the experimental results.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#E-6] Details of the hardware specification}
+%
+
+We added the details of hardware specifications in Section~\ref{sec:eval:area_overhead}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#E-7] Typos in Fig.~\ref{fig:duplex_operation_flow}}
+%
+
+We fixed the typos in Fig.~\ref{fig:duplex_operation_flow}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#F-1] Implication of distribution of tokens among MoEs on expert co-processing.}
+
+
+The effect of expert co-processing can vary based on the distribution of tokens among MoEs.
+We added the discussion in Section~\ref{sec:discussion:expert_distribution}.
+%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+\rule[0.5ex]{8.8cm}{0.5pt}
+
+\noindent
+\textbf{[\#F-2] Parallelization scheme}
+%
+
+For the \doublegpu case, we follow the model distribution methodology shown in Fig.~\ref{fig:gpu_distribution}. 
+When increasing the number of GPUs, we first increase the number of devices in a node to eight, and if necessary, increase the number of nodes. 
+If the number of GPUs ($N_{\text{GPUs}}$) exceeds the number of experts ($N_{\text{ex}}$), then each expert is allocated \(\frac{N_{\text{GPUs}}}{N_{\text{ex}}}\) GPUs using tensor parallelism.
+We added the details in Section~\ref{sec:motivaiton} and Section~\ref{sec:experimental_setup}.

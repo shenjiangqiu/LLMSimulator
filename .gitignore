@@ -1,1 +1,10 @@
 /build.idea/
+/build/
+/build_release
+/.cache
+/.idea
+/.DS_Store
+/log/
+/result_view.html
+/compile_commands.json
+/.sisyphus

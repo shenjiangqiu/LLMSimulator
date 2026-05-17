@@ -1,0 +1,45 @@
+\section{Background: Attention Inference-Time Workflow}
+\label{sec: background}
+
+The LLM attention inference-time workflow involves two phases: i) the \textit{prefill} phase, where the input prompt is used to generate KV cache for each transformer layer of LLMs; and ii) the \textit{decoding} phase, where the model uses and updates KV cache to generate the next token, one at a time. 
+% At each step, the model only encodes the tokens that were created in the previous step. Moreover, each time a new token is generated, its associated key and value vectors are added to the existing KV cache. As a result, the size of the KV cache is in proportional to the total number of tokens inside the current batch. 
+
+\paragraph{Prefill Phase.} Let $\mX \in \mathbb{R}^{b\times l_{\text{prompt}} \times d}$ be the input tensor, where $b$ is the batch size, $l_{\text{prompt}}$ is the length of the input prompt, and $d$ is the model hidden size.  
+For convenience, we ignore the layer index here. 
+The key, value tensors can be computed by
+
+\vspace{-2em}
+\begin{equation}
+    \mX_K= \mX \mW_K, \mX_V = \mX \mW_V, \nonumber
+\end{equation}
+\vspace{-2em}
+
+where $\mW_K, \mW_V\in\mathbb{R}^{d\times d}$ are the key and value layer weight, respectively.  After obtaining $\mX_K$ and $\mX_V$, they are cached in the memory for the ease of decoding.
+
+\paragraph{Decoding Phase.} Let $\vt \in \mathbb{R}^{b\times 1 \times d}$ be the current input token embedding. 
+Let $\vt_K=\vt \mW_K$ and $\vt_V=\vt \mW_V$ be the key and value layer output, respectively.
+We first update KV cache:
+\vspace{-1em}
+\begin{align}
+    \mX_K &\leftarrow \text{Concat} (\mX_K, \vt_K), \nonumber \\
+    \mX_V &\leftarrow \text{Concat} (\mX_V,  \vt_V ) \nonumber,     
+\end{align}
+then calculate the attention output as:
+\begin{align}
+ \vt_Q &= \vt \mW_Q,   \nonumber \\
+  \mA &= \text{Softmax} (\vt_Q \mX^{\top}_K),  \nonumber \\
+ \vt_O &= \mA\mX_V,
+ \label{eq: av}
+\end{align}
+\vspace{-2em}
+
+where $\mW_Q$ is the weight matrix of the query layer. 
+For ease of illustration, we ignore the attention output layer and the other parts of the inference workflow.
+
+\paragraph{Memory and Speed Analysis.}
+The above process is repeated until a special token indicating the sentence's conclusion is reached.
+Let $l_{\textbf{gen}}$ be the number of generated tokens.
+From the above analysis, the shape of KV cache is $b\times (l_{\textbf{prompt}}+l_{\textbf{gen}})\times d$.
+To get a sense of the scale, consider the OPT-175B model with a batch size $b$ 512, a prompt length $l_{\textbf{prompt}}$ 512, and an output length $l_{\textbf{gen}}$ 32. The KV cache requires 1.2TB, which is 3.8 times the model weights \citep{flexgen}. 
+Besides the memory, the inference speed is also decided by the KV cache size.
+The GPU needs to load KV cache from GPU main memory to GPU SRAM once for every token generated during which the computational core of the chip is essentially idle \citep{pope2023efficiently, vllm}.

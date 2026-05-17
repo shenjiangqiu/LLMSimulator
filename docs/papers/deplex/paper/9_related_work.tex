@@ -1,0 +1,25 @@
+\section{Related Work}
+\label{sec:related_work}
+Most ASIC- and FPGA-based LLM accelerators have focused on quantization or pruning to reduce the size of the model or memory usage.
+\cite{hpca-2020-a3, isca-2021-elsa, hpca-2021-spatten, micro-2021-sanger, isca-2023-fact, asplos-2022-dota, isca-2022-mokey, isca-2022-leopard, micro-2022-butterfly, vlsi-2022-nmsparse} focused on the presence of unnecessary values in the attention matrix, which is the result of multiplying the Q and K matrices within the MHA layer of the transformer model. 
+They proposed accelerators that approximate attention operations or prune unnecessary values in the attention matrix through methods such as eager prediction.
+\cite{micro-2020-gobo, hpca-2021-spatten, isca-2023-olive} proposed accelerators that support quantization of the weight or embedding vector of the transformer model.
+Meanwhile, \cite{micro-2022-dfx, asplos-2023-flat} proposed accelerators that process the transformer model losslessly.
+\cite{micro-2022-dfx} proposed a system that distributes processing across multiple FPGAs for low-latency inference of the transformer model and \cite{asplos-2023-flat} proposed a dataflow for the accelerator to improve the efficiency of the attention operation.
+
+Numerous studies have proposed leveraging near-memory processing or PIM to process the transformer model effectively.
+\cite{isca-2021-hbm-pim, isscc-2022-aim} introduced commercialized PIM architectures on HBM and GDDR, respectively.
+They proposed a system and software stack that offloads the GEMV operations of the transformer model to the PIM architecture with in-bank processing units.
+\cite{asplos-2024-attacc} proposed a PIM architecture that efficiently handles attention operations with extremely low-\opb and high memory capacity requirements on large batch sizes.
+\cite{asplos-2024-neupim} proposed the integration of NPU and PIMs to efficiently handle both GEMM and GEMV.
+\cite{hpca-2022-transpim} proposed an end-to-end accelerator to process the transformer model on PIM.
+
+TOP-PIM~\cite{hpdc-2014-toppim} proposed GPU with PIM stacks, achieving acceleration for memory-intensive workloads through the internal stack bandwidth between the DRAM die and logic die, which is higher than the I/O bandwidth of the HBM stack.
+However, it did not aim to accelerate LLMs and lacks details of DRAM die architectures.
+Also, it did not consider concurrently executing GPUs and PIM stacks; thus, the expert and attention co-processing cannot be applied.
+%
+Despite these works on accelerating LLMs and PIM architectures, to the best of our knowledge, \duplex is the first to accelerate LLMs with MoE and GQA in continuous batching.
+
+
+\label{sec:related_work:accelerator}
+

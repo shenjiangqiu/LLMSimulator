@@ -1,0 +1,167 @@
+\begin{thebibliography}{32}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[sha(2023)]{shargpt}
+{ShareGPT Team}.
+\newblock \url{https://sharegpt.com/}, 2023.
+
+\bibitem[Ainslie et~al.(2023)Ainslie, Lee-Thorp, de~Jong, Zemlyanskiy, Lebr{\'o}n, and Sanghai]{gqa}
+Joshua Ainslie, James Lee-Thorp, Michiel de~Jong, Yury Zemlyanskiy, Federico Lebr{\'o}n, and Sumit Sanghai.
+\newblock Gqa: Training generalized multi-query transformer models from multi-head checkpoints.
+\newblock \emph{arXiv preprint arXiv:2305.13245}, 2023.
+
+\bibitem[Bai et~al.(2023)Bai, Lv, Zhang, Lyu, Tang, Huang, Du, Liu, Zeng, Hou, Dong, Tang, and Li]{bai2023longbench}
+Yushi Bai, Xin Lv, Jiajie Zhang, Hongchang Lyu, Jiankai Tang, Zhidian Huang, Zhengxiao Du, Xiao Liu, Aohan Zeng, Lei Hou, Yuxiao Dong, Jie Tang, and Juanzi Li.
+\newblock Longbench: A bilingual, multitask benchmark for long context understanding.
+\newblock \emph{arXiv preprint arXiv:2308.14508}, 2023.
+
+\bibitem[Brown et~al.(2020)Brown, Mann, Ryder, Subbiah, Kaplan, Dhariwal, Neelakantan, Shyam, Sastry, Askell, et~al.]{gpt3}
+Tom Brown, Benjamin Mann, Nick Ryder, Melanie Subbiah, Jared~D Kaplan, Prafulla Dhariwal, Arvind Neelakantan, Pranav Shyam, Girish Sastry, Amanda Askell, et~al.
+\newblock Language models are few-shot learners.
+\newblock \emph{Advances in neural information processing systems}, 33:\penalty0 1877--1901, 2020.
+
+\bibitem[Chuang et~al.(2024)Chuang, Li, Yuan, Wang, Lai, Yu, Ding, Chang, Tan, Zha, et~al.]{chuang2024understanding}
+Yu-Neng Chuang, Songchen Li, Jiayi Yuan, Guanchu Wang, Kwei-Herng Lai, Leisheng Yu, Sirui Ding, Chia-Yuan Chang, Qiaoyu Tan, Daochen Zha, et~al.
+\newblock Understanding different design choices in training large time series models.
+\newblock \emph{arXiv preprint arXiv:2406.14045}, 2024.
+
+\bibitem[Dettmers et~al.(2022)Dettmers, Lewis, Belkada, and Zettlemoyer]{llmint8}
+Tim Dettmers, Mike Lewis, Younes Belkada, and Luke Zettlemoyer.
+\newblock Llm. int8 (): 8-bit matrix multiplication for transformers at scale.
+\newblock \emph{arXiv preprint arXiv:2208.07339}, 2022.
+
+\bibitem[Frantar et~al.(2022)Frantar, Ashkboos, Hoefler, and Alistarh]{gptq}
+Elias Frantar, Saleh Ashkboos, Torsten Hoefler, and Dan Alistarh.
+\newblock Gptq: Accurate post-training quantization for generative pre-trained transformers.
+\newblock \emph{arXiv preprint arXiv:2210.17323}, 2022.
+
+\bibitem[Gao et~al.(2021)Gao, Tow, Biderman, Black, DiPofi, Foster, Golding, Hsu, McDonell, Muennighoff, et~al.]{eval-harness}
+Leo Gao, Jonathan Tow, Stella Biderman, Sid Black, Anthony DiPofi, Charles Foster, Laurence Golding, Jeffrey Hsu, Kyle McDonell, Niklas Muennighoff, et~al.
+\newblock A framework for few-shot language model evaluation.
+\newblock \emph{Version v0. 0.1. Sept}, page~8, 2021.
+
+\bibitem[Hooper et~al.(2024)Hooper, Kim, Mohammadzadeh, Mahoney, Shao, Keutzer, and Gholami]{hooper2024kvquant}
+Coleman Hooper, Sehoon Kim, Hiva Mohammadzadeh, Michael~W Mahoney, Yakun~Sophia Shao, Kurt Keutzer, and Amir Gholami.
+\newblock Kvquant: Towards 10 million context length llm inference with kv cache quantization.
+\newblock \emph{arXiv preprint arXiv:2401.18079}, 2024.
+
+\bibitem[Jiang et~al.(2023)Jiang, Sablayrolles, Mensch, Bamford, Chaplot, Casas, Bressand, Lengyel, Lample, Saulnier, et~al.]{jiang2023mistral}
+Albert~Q Jiang, Alexandre Sablayrolles, Arthur Mensch, Chris Bamford, Devendra~Singh Chaplot, Diego de~las Casas, Florian Bressand, Gianna Lengyel, Guillaume Lample, Lucile Saulnier, et~al.
+\newblock Mistral 7b.
+\newblock \emph{arXiv preprint arXiv:2310.06825}, 2023.
+
+\bibitem[Jin et~al.(2023)Jin, Wu, Brooks, and Wei]{jin2023s}
+Yunho Jin, Chun-Feng Wu, David Brooks, and Gu-Yeon Wei.
+\newblock S3: Increasing gpu utilization during generative inference for higher throughput.
+\newblock \emph{arXiv preprint arXiv:2306.06000}, 2023.
+
+\bibitem[Kim et~al.(2023)Kim, Hooper, Gholami, Dong, Li, Shen, Mahoney, and Keutzer]{kim2023squeezellm}
+Sehoon Kim, Coleman Hooper, Amir Gholami, Zhen Dong, Xiuyu Li, Sheng Shen, Michael~W Mahoney, and Kurt Keutzer.
+\newblock Squeezellm: Dense-and-sparse quantization.
+\newblock \emph{arXiv preprint arXiv:2306.07629}, 2023.
+
+\bibitem[Kwon et~al.(2023)Kwon, Li, Zhuang, Sheng, Zheng, Yu, Gonzalez, Zhang, and Stoica]{vllm}
+Woosuk Kwon, Zhuohan Li, Siyuan Zhuang, Ying Sheng, Lianmin Zheng, Cody~Hao Yu, Joseph Gonzalez, Hao Zhang, and Ion Stoica.
+\newblock Efficient memory management for large language model serving with pagedattention.
+\newblock In \emph{Proceedings of the 29th Symposium on Operating Systems Principles}, pages 611--626, 2023.
+
+\bibitem[Lin et~al.(2023)Lin, Tang, Tang, Yang, Dang, and Han]{lin2023awq}
+Ji~Lin, Jiaming Tang, Haotian Tang, Shang Yang, Xingyu Dang, and Song Han.
+\newblock Awq: Activation-aware weight quantization for llm compression and acceleration.
+\newblock \emph{arXiv preprint arXiv:2306.00978}, 2023.
+
+\bibitem[Liu et~al.(2024)Liu, Desai, Liao, Wang, Xie, Xu, Kyrillidis, and Shrivastava]{liu2024scissorhands}
+Zichang Liu, Aditya Desai, Fangshuo Liao, Weitao Wang, Victor Xie, Zhaozhuo Xu, Anastasios Kyrillidis, and Anshumali Shrivastava.
+\newblock Scissorhands: Exploiting the persistence of importance hypothesis for llm kv cache compression at test time.
+\newblock \emph{Advances in Neural Information Processing Systems}, 36, 2024.
+
+\bibitem[Mohtashami and Jaggi(2023)]{mohtashami2023passkey}
+Amirkeivan Mohtashami and Martin Jaggi.
+\newblock Landmark attention: Random-access infinite context length for transformers.
+\newblock \emph{arXiv preprint arXiv:2305.16300}, 2023.
+
+\bibitem[Penedo et~al.(2023)Penedo, Malartic, Hesslow, Cojocaru, Cappelli, Alobeidli, Pannier, Almazrouei, and Launay]{penedo2023refinedweb}
+Guilherme Penedo, Quentin Malartic, Daniel Hesslow, Ruxandra Cojocaru, Alessandro Cappelli, Hamza Alobeidli, Baptiste Pannier, Ebtesam Almazrouei, and Julien Launay.
+\newblock The refinedweb dataset for falcon llm: outperforming curated corpora with web data, and web data only.
+\newblock \emph{arXiv preprint arXiv:2306.01116}, 2023.
+
+\bibitem[Pope et~al.(2023)Pope, Douglas, Chowdhery, Devlin, Bradbury, Heek, Xiao, Agrawal, and Dean]{pope2023efficiently}
+Reiner Pope, Sholto Douglas, Aakanksha Chowdhery, Jacob Devlin, James Bradbury, Jonathan Heek, Kefan Xiao, Shivani Agrawal, and Jeff Dean.
+\newblock Efficiently scaling transformer inference.
+\newblock \emph{Proceedings of Machine Learning and Systems}, 5, 2023.
+
+\bibitem[Reid et~al.(2024)Reid, Savinov, Teplyashin, Lepikhin, Lillicrap, Alayrac, Soricut, Lazaridou, Firat, Schrittwieser, et~al.]{reid2024gemini}
+Machel Reid, Nikolay Savinov, Denis Teplyashin, Dmitry Lepikhin, Timothy Lillicrap, Jean-baptiste Alayrac, Radu Soricut, Angeliki Lazaridou, Orhan Firat, Julian Schrittwieser, et~al.
+\newblock Gemini 1.5: Unlocking multimodal understanding across millions of tokens of context.
+\newblock \emph{arXiv preprint arXiv:2403.05530}, 2024.
+
+\bibitem[Shazeer(2019)]{mqa}
+Noam Shazeer.
+\newblock Fast transformer decoding: One write-head is all you need.
+\newblock \emph{arXiv preprint arXiv:1911.02150}, 2019.
+
+\bibitem[Sheng et~al.(2023)Sheng, Zheng, Yuan, Li, Ryabinin, Chen, Liang, R{\'e}, Stoica, and Zhang]{flexgen}
+Ying Sheng, Lianmin Zheng, Binhang Yuan, Zhuohan Li, Max Ryabinin, Beidi Chen, Percy Liang, Christopher R{\'e}, Ion Stoica, and Ce~Zhang.
+\newblock Flexgen: High-throughput generative inference of large language models with a single gpu.
+\newblock In \emph{International Conference on Machine Learning}, pages 31094--31116. PMLR, 2023.
+
+\bibitem[Taylor et~al.(2022)Taylor, Kardas, Cucurull, Scialom, Hartshorn, Saravia, Poulton, Kerkez, and Stojnic]{taylor2022galactica}
+Ross Taylor, Marcin Kardas, Guillem Cucurull, Thomas Scialom, Anthony Hartshorn, Elvis Saravia, Andrew Poulton, Viktor Kerkez, and Robert Stojnic.
+\newblock Galactica: A large language model for science.
+\newblock \emph{arXiv preprint arXiv:2211.09085}, 2022.
+
+\bibitem[Tian et~al.(2023)Tian, Wang, Chen, and Du]{tian2023scan}
+Yuandong Tian, Yiping Wang, Beidi Chen, and Simon Du.
+\newblock Scan and snap: Understanding training dynamics and token composition in 1-layer transformer.
+\newblock \emph{arXiv preprint arXiv:2305.16380}, 2023.
+
+\bibitem[Touvron et~al.(2023{\natexlab{a}})Touvron, Lavril, Izacard, Martinet, Lachaux, Lacroix, Rozi{\`e}re, Goyal, Hambro, Azhar, et~al.]{touvron2023llama}
+Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier Martinet, Marie-Anne Lachaux, Timoth{\'e}e Lacroix, Baptiste Rozi{\`e}re, Naman Goyal, Eric Hambro, Faisal Azhar, et~al.
+\newblock Llama: Open and efficient foundation language models.
+\newblock \emph{arXiv preprint arXiv:2302.13971}, 2023{\natexlab{a}}.
+
+\bibitem[Touvron et~al.(2023{\natexlab{b}})Touvron, Martin, Stone, Albert, Almahairi, Babaei, Bashlykov, Batra, Bhargava, Bhosale, et~al.]{touvron2023llama2}
+Hugo Touvron, Louis Martin, Kevin Stone, Peter Albert, Amjad Almahairi, Yasmine Babaei, Nikolay Bashlykov, Soumya Batra, Prajjwal Bhargava, Shruti Bhosale, et~al.
+\newblock Llama 2: Open foundation and fine-tuned chat models.
+\newblock \emph{arXiv preprint arXiv:2307.09288}, 2023{\natexlab{b}}.
+
+\bibitem[Xiao et~al.(2023{\natexlab{a}})Xiao, Lin, Seznec, Wu, Demouth, and Han]{xiao2023smoothquant}
+Guangxuan Xiao, Ji~Lin, Mickael Seznec, Hao Wu, Julien Demouth, and Song Han.
+\newblock Smoothquant: Accurate and efficient post-training quantization for large language models.
+\newblock In \emph{International Conference on Machine Learning}, pages 38087--38099. PMLR, 2023{\natexlab{a}}.
+
+\bibitem[Xiao et~al.(2023{\natexlab{b}})Xiao, Tian, Chen, Han, and Lewis]{xiao2023efficient}
+Guangxuan Xiao, Yuandong Tian, Beidi Chen, Song Han, and Mike Lewis.
+\newblock Efficient streaming language models with attention sinks.
+\newblock \emph{arXiv preprint arXiv:2309.17453}, 2023{\natexlab{b}}.
+
+\bibitem[Xu et~al.(2023)Xu, Liu, Chen, Tang, Wang, Zhou, Hu, and Shrivastava]{xu2023compress}
+Zhaozhuo Xu, Zirui Liu, Beidi Chen, Yuxin Tang, Jue Wang, Kaixiong Zhou, Xia Hu, and Anshumali Shrivastava.
+\newblock Compress, then prompt: Improving accuracy-efficiency trade-off of llm inference with transferable prompt.
+\newblock \emph{arXiv preprint arXiv:2305.11186}, 2023.
+
+\bibitem[Yuan et~al.(2023)Yuan, Tang, Jiang, and Hu]{yuan2023large}
+Jiayi Yuan, Ruixiang Tang, Xiaoqian Jiang, and Xia Hu.
+\newblock Large language models for healthcare data augmentation: An example on patient-trial matching.
+\newblock In \emph{AMIA Annual Symposium Proceedings}, volume 2023, page 1324. American Medical Informatics Association, 2023.
+
+\bibitem[Yuan et~al.(2024)Yuan, Liu, Zhong, Chuang, Li, Wang, Le, Jin, Chaudhary, Xu, Liu, and Hu]{yuan2024kv}
+Jiayi Yuan, Hongyi Liu, Shaochen Zhong, Yu-Neng Chuang, Songchen Li, Guanchu Wang, Duy Le, Hongye Jin, Vipin Chaudhary, Zhaozhuo Xu, Zirui Liu, and Xia Hu.
+\newblock Kv cache compression, but what must we give in return? a comprehensive benchmark of long context capable approaches.
+\newblock \emph{arXiv preprint arXiv:2407.01527}, 2024.
+
+\bibitem[Zhang et~al.(2023)Zhang, Sheng, Zhou, Chen, Zheng, Cai, Song, Tian, R{\'e}, Barrett, et~al.]{h2o}
+Zhenyu Zhang, Ying Sheng, Tianyi Zhou, Tianlong Chen, Lianmin Zheng, Ruisi Cai, Zhao Song, Yuandong Tian, Christopher R{\'e}, Clark Barrett, et~al.
+\newblock H $ \_2 $ o: Heavy-hitter oracle for efficient generative inference of large language models.
+\newblock \emph{arXiv preprint arXiv:2306.14048}, 2023.
+
+\bibitem[Zhao et~al.(2024)Zhao, Lin, Zhu, Ye, Chen, Zheng, Ceze, Krishnamurthy, Chen, and Kasikci]{zhao2024atom}
+Yilong Zhao, Chien-Yu Lin, Kan Zhu, Zihao Ye, Lequn Chen, Size Zheng, Luis Ceze, Arvind Krishnamurthy, Tianqi Chen, and Baris Kasikci.
+\newblock Atom: Low-bit quantization for efficient and accurate llm serving.
+\newblock \emph{Proceedings of Machine Learning and Systems}, 6:\penalty0 196--209, 2024.
+
+\end{thebibliography}

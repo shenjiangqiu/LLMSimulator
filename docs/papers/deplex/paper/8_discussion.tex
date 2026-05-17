@@ -1,0 +1,35 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Split Prefill and Decoding Node}
+\label{sec:discussion:splitwise}
+
+Splitwise~\cite{isca-2024-splitwise} proposed an LLM inference system by dividing nodes into prefill (prompt) and decoding (token) nodes. 
+Based on the importance of high computing power for the prefill stage and memory bandwidth for the decoding stage, Splitwise suggested a cost-effective system by deploying suitable hardware across prefill and decoding nodes. 
+This approach benefits in low tail latency of \tbt compared to non-split systems, as no mixed stages are involved in token generation within the decoding nodes.
+
+However, split systems show lower throughput than non-split systems due to the underutilization problems and the wasted memory capacity due to weight duplication (see Fig.~\ref{fig:split_duplex}).
+The utilization of prefill and decoding nodes varies across batch sizes, input, and output sequence lengths. 
+One of the prefill or decoding nodes would suffer from low utilization unless it targets a specific scenario. 
+For cloud service providers, managing separate devices for prefill and decoding stages and reconfiguring the system to prevent underutilization for each target scenario is highly burdensome. 
+Further, the split approach incurs memory weight duplication, limiting batch size due to wasted memory capacity and thus degrading throughput compared to a non-split system.
+
+\subsection{Implications of Expert Skews on Expert Co-processing}
+\label{sec:discussion:expert_distribution}
+A prior work~\cite{2023-arxiv-moe-skew} argue that the number of tokens each expert processes can substantially differ. 
+In cases where there are hot experts processing a large number of tokens and cold experts processing a smaller number of tokens, \duplex can efficiently process the MoE layer by flexibly handling experts with both \highp and \lowp, exploiting expert co-processing. 
+However, in ideal cases where each expert processes the same number of tokens, expert co-processing may not be as effective.
+
+\subsection{KV Cache Migration and Recomputation}
+\label{sec:discussion:kvcache}
+The generated KV cache size increases in proportion to the batch size and sequence length. 
+With the current trend of increasing sequence length~\cite{cal-2023-attacc}, the KV cache could lead to a shortage of device memory capacity in a system. 
+PagedAttention~\cite{sosp-2023-pagedattention} proposed KV cache migration and recomputation when its capacity exceeds the memory capacity of the GPU system.
+KV cache migration involves evicting a portion of requests and migrating the KV caches to CPU memory to free up device memory capacity.
+Once the inference of the ongoing requests are completed and there is available device memory capacity, the system brings the evicted KV caches back to the device memory to resume the inference. 
+In the recomputation method, the KV caches are deleted instead of being migrated.
+When the inference of evicted requests is resumed, the previous KV caches are recomputed.
+These methods can be complementarily applied to \duplex.
+
+
+

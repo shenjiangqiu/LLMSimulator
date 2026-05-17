@@ -1,0 +1,105 @@
+% \begin{table}
+% \centering
+% \caption{Performance comparison between 16bit, four fake 2bit KV cache quantization similar to those in Table \ref{tab:sub_simulation}, \kivi-2 (2bit)/\kivi-4 (4bit) across various models.
+% We emphasize that unlike \kivi which preserve a small portion of full precision key cache $\mX_{K_r}$, all tokens in fake KV cache quantization are quantized for a fair comparison.
+% Falcon adopts multi-query attention and only has one head for KV cache.
+% Thus it is already highly compressed and 4-bit \kivi may needed to maintain the accuracy in this case.}
+% \label{tab:merged-lm-eval}
+% \begin{tabular}{llccc} 
+% \hline
+% \multicolumn{2}{l}{\textbf{Model}}        & \textbf{CoQA} & \textbf{TruthfulQA} & \textbf{GSM8K}  \\
+% \hline
+% % \multirow{2}{*}{Llama-7B}    & 16bit  &      62.67      &          25.78    &   9.10       \\
+% %             & kivi-2 &      62.60     &        23.51    &    7.05        \\
+% % \hline
+% % \multirow{2}{*}{Llama-13B}   & 16bit  &      63.80     &          26.35     &   17.06       \\
+% %             & kivi-2 &      63.18       &         25.14     &    14.86     \\
+% % \hline
+% \multirow{6}{*}{Llama-2-7B}  & 16bit  &     63.88      &         30.76        &   13.50     \\
+% \cline{2-5}
+%  & 2bit (K per-channel, V per-token)  & 61.18 & \bf{33.39} & 2.35 \\
+%  & 2bit (K per-token, V per-token)     & 60.57 & 28.22 & 0.68 \\
+%  & 2bit (K per-channel, V per-channel) & 36.23 & 0.13 & 0.00\\
+%  & 2bit (K per-token, V per-channel)   & 37.72 & 0.14 &  0.00 \\
+%             & kivi-2 &      \bf{61.80}     &          32.80        &    \bf{11.22}   \\
+% \hline
+% \multirow{6}{*}{Llama-2-13B} & 16bit  &      66.37     &        29.53        &   22.67      \\
+% \cline{2-5}
+%  & 2bit (K per-channel, V per-token)  & 65.70 & 29.32  & 3.49 \\
+%  & 2bit (K per-token, V per-token)   & 63.10 & 24.81 & 1.67  \\
+%  & 2bit (K per-channel, V per-channel) & 38.45 & 1.89 & 0.08  \\
+%  & 2bit (K per-token, V per-channel)   & 33.45 & 2.27 &  0.08 \\
+%             & kivi-2 &    \bf{65.93}    &        \bf{29.51}          &     \bf{18.88}     \\
+% \hline
+% \multirow{7}{*}{Falcon-7B}   & 16bit  &     59.83   &   23.20    &        4.55          \\
+% \cline{2-5}
+%  & 2bit (K per-channel, V per-token)   & 54.13 & 21.73 & 0.76  \\
+%  & 2bit (K per-token, V per-token)    & 45.30 & 7.98 &  0.38 \\
+%  & 2bit (K per-channel, V per-channel) & 51.38 & 14.97 & 0.53  \\
+%  & 2bit (K per-token, V per-channel)   & 41.22 & 1.41 & 0.15 \\
+%             & kivi-4 &     \bf{60.17}      &   22.94    &       \bf{3.49}           \\
+%             & kivi-2 &     53.90      &  \bf{23.46}     &       1.97        \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+
+
+\begin{table}[h!]
+\centering
+\caption{Performance comparison between 16bit, 4-bit per-token quantization, four fake 2bit KV cache quantization similar to those in Table \ref{tab:sub_simulation}, \kivitwo{} (2bit) / \kivifour{} (4bit) across various models.
+We emphasize that unlike \kivi{}, which preserves a small portion of full precision key cache $\mX_{K_r}$ and value cache $\mX_{V_r}$, all tokens in fake KV cache quantization are quantized for a fair comparison.
+$\mathbb{C}$ stands for per-channel quantization and $\mathbb{T}$ stands for per-token quantization.}
+\label{tab:merged-lm-eval}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{llccc} 
+\toprule
+\multicolumn{2}{l}{\textbf{Model}}        & \textbf{CoQA} & \textbf{TruthfulQA} & \textbf{GSM8K}  \\
+\midrule
+\multirow{8}{*}{Llama-2-7B}  & 16bit  &     63.88      &         30.76        &   13.50     \\
+ & 4bit (K - $\mathbb{T}$, V - $\mathbb{T}$) & 64.82 & 29.85 & 12.28 \\
+\cmidrule{2-5}
+ & 2bit (K - $\mathbb{C}$, V - $\mathbb{T}$)  &  59.08 & 33.10 & 5.76 \\
+ & 2bit (K - $\mathbb{T}$, V - $\mathbb{T}$)     &  39.88 & 18.29 & 0.83 \\
+ & 2bit (K - $\mathbb{C}$, V - $\mathbb{C}$) & 3.60 & 0.27 & 0.00 \\
+ & 2bit (K - $\mathbb{T}$, V - $\mathbb{C}$)   & 1.30 & 0.49 & 0.08\\
+ % & kivi-2 (w/o buffer) & 61.80 & 32.80 & 11.22 \\
+ & \kivifour{} & 63.78 & 30.80 & 13.80 \\
+ & \kivitwo{} &  63.05 & 33.95 & 12.74 \\
+\midrule
+\multirow{8}{*}{Llama-2-13B} & 16bit  &      66.37     &        29.53        &   22.67      \\
+ & 4bit (K - $\mathbb{T}$, V - $\mathbb{T}$)  & 66.73 & 29.14 & 20.92 \\
+\cmidrule{2-5}
+ & 2bit (K - $\mathbb{C}$, V - $\mathbb{T}$)  & 63.53 & 28.60 & 12.21 \\
+ & 2bit (K - $\mathbb{T}$, V - $\mathbb{T}$)   & 52.93 & 24.98 & 4.55 \\
+ & 2bit (K - $\mathbb{C}$, V - $\mathbb{C}$) & 2.88 & 0.74 & 0.00 \\
+ & 2bit (K - $\mathbb{T}$, V - $\mathbb{C}$)   & 2.80 & 0.26 & 0.08 \\
+ % & kivi-2 (w/o buffer) & 65.93 & 29.51   &  18.88 \\
+ & \kivifour{} & 66.38 & 29.49 & 23.65\\
+ & \kivitwo{} & 66.23 & 29.84  & 20.77 \\
+\midrule
+\multirow{8}{*}{Falcon-7B}   & 16bit  &     59.83   &   23.20    &        4.55          \\
+ & 4bit (K - $\mathbb{T}$, V - $\mathbb{T}$)  & 58.53 & 22.94 & 3.26\\
+\cmidrule{2-5}
+ & 2bit (K - $\mathbb{C}$, V - $\mathbb{T}$)   &  43.93 & 20.82 & 1.29 \\
+ & 2bit (K - $\mathbb{T}$, V - $\mathbb{T}$)    & 25.72 & 0.91 & 0.53 \\
+ & 2bit (K - $\mathbb{C}$, V - $\mathbb{C}$) & 41.95 & 17.11 & 1.52 \\
+ & 2bit (K - $\mathbb{T}$, V - $\mathbb{C}$)   & 19.53 & 0.94 & 0.15 \\
+ & \kivifour{} & 59.67 & 22.58 & 4.47 \\
+ & \kivitwo{} & 57.48 & 24.98 & 3.41 \\
+\midrule
+\multirow{8}{*}{Mistral-7B}   & 16bit  &     67.40  &  30.45  &  38.36     \\
+ & 4bit (K - $\mathbb{T}$, V - $\mathbb{T}$)  & 67.80 & 29.83 & 36.85 \\
+\cmidrule{2-5}
+ & 2bit (K - $\mathbb{C}$, V - $\mathbb{T}$)   & 61.65 & 29.64 & 26.46 \\
+ & 2bit (K - $\mathbb{T}$, V - $\mathbb{T}$)     & 54.55 & 25.86 & 5.00 \\
+ & 2bit (K - $\mathbb{C}$, V - $\mathbb{C}$) & 24.40 & 24.86 & 2.27  \\
+ & 2bit (K - $\mathbb{T}$, V - $\mathbb{C}$)   & 10.73 & 19.12 & 0.99 \\
+ % & kivi-2 (w/o buffer) & 66.45 & 29.76 & 28.73 \\
+ & \kivifour{} & 66.95 & 30.49 & 37.30\\
+ & \kivitwo{} & 66.35 & 32.17 & 36.01  \\
+\bottomrule
+\vspace{-1.5em}
+\end{tabular}
+}
+\end{table}

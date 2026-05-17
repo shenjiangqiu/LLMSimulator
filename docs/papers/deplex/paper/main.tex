@@ -1,0 +1,206 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is the template for submission
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage[hyphens]{url}
+\usepackage{multirow}
+\usepackage{adjustbox}
+\usepackage{xspace}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xfrac}
+\usepackage{hhline}
+\usepackage{balance}
+\usepackage[all]{nowidow}
+%\usepackage{hyperref}
+%\usepackage{doi}
+\usepackage[bookmarks=true,breaklinks=true,letterpaper=true,colorlinks,citecolor=blue,linkcolor=blue,urlcolor=blue]{hyperref}
+
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+
+% Ensure letter paper
+\pdfpagewidth=8.5in
+\pdfpageheight=11in
+
+
+\pagenumbering{arabic}
+
+
+%%%%%% -- PAPER CONTENT STARTS-- %%%%%%%%
+
+
+% --- Acronyms ---
+\newcommand{\tbt}{{TBT}\xspace}
+\newcommand{\ttft}{{T2FT}\xspace}
+\newcommand{\ete}{{E2E}\xspace}
+
+\newcommand{\genstage}{{decode-only stage}\xspace}
+\newcommand{\deconlystage}{{decoding-only stage}\xspace}
+\newcommand{\mixedstage}{{mixed stage}\xspace}
+
+\newcommand{\duplex}{{Duplex}\xspace}
+\newcommand{\bankbundle}{{bank bundle}\xspace}
+\newcommand{\highp}{{xPU}\xspace}
+\newcommand{\lowp}{{Logic-PIM}\xspace}
+\newcommand{\bankpim}{{Bank-PIM}\xspace}
+\newcommand{\bgpim}{{Bankgroup-PIM}\xspace}
+
+\newcommand{\opb}{{Op/B}\xspace}
+
+\newcommand{\hgxb}{{\textbf{HGX}}\xspace}
+\newcommand{\gpu}{{GPU}\xspace}
+\newcommand{\doublegpu}{{2$\times$GPU}\xspace}
+
+\newcommand{\duplexh}{{Duplex-Hetero}\xspace}
+\newcommand{\duplexpe}{{Duplex+PE}\xspace}
+\newcommand{\duplexpet}{{Duplex+PE+ET}\xspace}
+\newcommand{\duplexplus}{{Duplex+Plus}\xspace}
+\newcommand{\duplexbankpim}{{Bank-PIM}\xspace}
+\newcommand{\duplexsplit}{{Duplex-Split}\xspace}
+
+
+\newcommand{\mixtral}{{Mixtral}\xspace}
+\newcommand{\dsmoe}{{DeepSpeed-MoE}\xspace}
+\newcommand{\glam}{{GLaM}\xspace}
+\newcommand{\grok}{{Grok1}\xspace}
+\newcommand{\opt}{{OPT}\xspace}
+\newcommand{\llama}{{Llama3}\xspace}
+
+\newcommand{\ie}{\textit{i.e.}\xspace}
+\newcommand{\eg}{\textit{e.g.}\xspace}
+\newcommand{\cf}{\textit{cf.}\xspace}
+\newcommand{\Numex}{$N_{ex}$\xspace}
+\newcommand{\deggrp}{$deg_{grp}$\xspace}
+\newcommand{\topk}{top-$k$\xspace}
+\newcommand{\lin}{$L_{in}$\xspace}
+\newcommand{\lout}{$L_{out}$\xspace}
+\newcommand{\nhead}{$N_{head}$\xspace}
+
+% --- graph & table ---
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+
+
+
+%%%%%%%%%%%---SETME-----%%%%%%%%%%%%%
+\title{Duplex: A Device for Large Language Models with Mixture of Experts, Grouped Query Attention, and Continuous Batching} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%% -- User Defined Start -- %%%%%%%%%%%%%
+\usepackage{lipsum}
+\usepackage{enumitem}
+\usepackage{xspace}
+\usepackage{hhline}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{lipsum}
+\usepackage{blindtext}
+\usepackage{tikz}
+%\usepackage{xfrac}
+%\usepackage{booktabs}
+\usepackage{subfigure}
+\usepackage{enumitem}
+%%%
+\usepackage{color}
+\usepackage{soul}
+\usepackage{comment}
+\usepackage{balance}
+\usepackage{xfrac}
+\usepackage{dblfloatfix}
+\usepackage{mathabx}
+\usepackage{amsmath}
+\usepackage{dashrule}
+
+\usepackage[all]{nowidow}
+
+\newcommand{\sungmin}[1]{{\color{magenta} #1}}
+\newcommand{\jongmin}[1]{{\color{blue} #1}}
+\newcommand{\kwanhee}[1]{{\color{orange} #1}}
+\newcommand{\jwchoi}[1]{{\color{magenta} #1}}
+%%%%%%%%%%% -- User Defined End -- %%%%%%%%%%%%%
+
+
+\author{\IEEEauthorblockN{Sungmin Yun\IEEEauthorrefmark{2},
+Kwanhee Kyung\IEEEauthorrefmark{2},
+Juhwan Cho\IEEEauthorrefmark{2}, 
+Jaewan Choi\IEEEauthorrefmark{2},
+Jongmin Kim\IEEEauthorrefmark{2},\\
+Byeongho Kim\IEEEauthorrefmark{3},
+Sukhan Lee\IEEEauthorrefmark{3},
+Kyomin Sohn\IEEEauthorrefmark{3},
+Jung Ho Ahn\IEEEauthorrefmark{2}}
+\IEEEauthorblockA{\IEEEauthorrefmark{2}\textit{Seoul National University, Seoul, South Korea}, \IEEEauthorrefmark{3}\textit{Samsung Electronics, Hwasung, South Korea}\\
+\textit{\{sungmin.yun, kwanhee5, jfcho2, cjw9202, jongmin.kim, gajh\}@snu.ac.kr}\\ \textit{\{bh1122.kim, sh1026.lee, kyomin.sohn\}@samsung.com}}
+}
+
+
+\begin{document}
+\maketitle
+\pagestyle{plain}
+
+
+%%%%%% -- PAPER CONTENT STARTS-- %%%%%%%%
+
+\begin{abstract}
+Large language models (LLMs) have emerged due to their capability to generate high-quality content across diverse contexts.
+To reduce their explosively increasing demands for computing resources, a mixture of experts (MoE) has emerged.
+The MoE layer enables exploiting a huge number of parameters with less computation.
+Applying state-of-the-art continuous batching increases throughput; however, it leads to frequent DRAM access in the MoE and attention layers.
+We observe that conventional computing devices have limitations when processing the MoE and attention layers, which dominate the total execution time and exhibit low arithmetic intensity (\opb).
+Processing MoE layers only with devices targeting low-\opb such as processing-in-memory (PIM) architectures is challenging due to the fluctuating \opb in the MoE layer caused by continuous batching.
+
+
+
+To address these challenges, we propose \duplex, which comprises \highp tailored for high-\opb and \lowp to effectively perform low-\opb operation within a single device. 
+\duplex selects the most suitable processor based on the \opb of each layer within LLMs.
+As the \opb of the MoE layer is at least 1 and that of the attention layer has a value of 4--8 for grouped query attention, prior PIM architectures are not efficient, which place processing units inside DRAM dies and only target extremely low-\opb (under one) operations.
+Based on recent trends, \lowp adds more through-silicon vias (TSVs) to enable high-bandwidth communication between the DRAM die and the logic die and place powerful processing units on the logic die, which is best suited for handling low-\opb operations ranging from few to a few dozens.
+To maximally utilize the \highp and \lowp, we propose expert and attention co-processing.
+By exploiting proper processing units for MoE and attention layers, \duplex shows up to 2.67$\times$ higher throughput and consumes 42.0\% less energy compared to GPU systems for LLM inference.
+
+\end{abstract}
+
+\begin{IEEEkeywords}
+large language models, processing-in-memory, mixture of experts, grouped query attention, continuous batching
+\end{IEEEkeywords}
+
+\input{1_introduction}
+\input{2_background}
+\input{3_motivation}
+\input{4_contribution-1}
+\input{5_contribution-2}
+\input{6_experimental_setup}
+\input{7_evaluation}
+\input{8_discussion}
+\input{9_related_work}
+\input{10_conclusion}
+
+\section*{Acknowledgment}
+This work was partly supported by the Samsung Electronics, the National Research Foundation of Korea grant funded by the Korea government (MSIT) (RS-2024-00405857), Institute of Information \& communications Technology Planning \& Evaluation (IITP) grant funded by MSIT (RS-2024-00402898, RS-2021-II211343), and IITP under the artificial intelligence semiconductor support program funded by MSIT (IITP-2023-RS-2023-00256081).
+The EDA tool was supported by the IC Design Education Center (IDEC), Korea.
+The ICT at Seoul National University provides research facilities for this study.
+Jung Ho Ahn is the corresponding author.
+
+%%%%%%% -- PAPER CONTENT ENDS -- %%%%%%%%
+
+
+%%%%%%%%% -- BIB STYLE AND FILE -- %%%%%%%%
+\balance
+\bibliographystyle{IEEEtranS}
+\bibliography{refs}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+

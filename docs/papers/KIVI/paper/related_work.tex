@@ -1,0 +1,17 @@
+\section{Related Work}
+
+Many machine learning systems and benchmark works consider scaling up LLM inference process \citep{pope2023efficiently, yuan2024kv}.
+Among them, quantization techniques have been widely applied \citep{gptq, lin2023awq, kim2023squeezellm, xu2023compress}. A main branch of LLM quantization is weight-only quantization, which involves the quantization of model weights to lower precision. For instance, AWQ~\citep{lin2023awq} cleverly quantizes model weights to INT4 and INT3 using an activation-aware manner. GPTQ~\citep{gptq} utilizes approximate second-order information to quantize model weights both accurately and efficiently. SqueezeLLM~\citep{kim2023squeezellm} adopts the concept of non-uniform quantization based on sensitivity along with dense-and-sparse decomposition. 
+This line of work is orthogonal to ours, as they can be combined.
+
+SmoothQuant~\citep{xiao2023smoothquant} is a post-training quantization method that is more closely related to our work. This method uses equivalent transformations to balance the quantization complexity for both activation and weight, making the activation easier to quantize. SmoothQuant can compress KV cache to 8bit with minor performance loss. However, it faces a significant accuracy drop when scaled down to 4bit or less~\citep{zhao2024atom}.
+FlexGen~\citep{flexgen} adopts 4-bit group-wise quantization for both key and value cache.
+
+One essential recipe of \kivi{} is the per-channel quantization scheme designed based on the observation made in Section~\ref{sec: analysis} and Figure~\ref{fig: vis}. 
+ATOM \citep{zhao2024atom} also indicates that key cache exhibits more outliers compared to the value cache. \kivi{} provides further extensive analysis and leverages this observation to implement per-channel quantization. A similar observation and approach has been independently discovered and developed in the concurrent work KVQuant \citep{hooper2024kvquant}.
+
+vLLM \citep{vllm} and S3 \citep{jin2023s} are system-level works, which include memory management through the use of PagedAttention or memory usage prediction. They can lower the memory requirements of KV cache and simultaneously increase model throughput. This research direction is orthogonal to our work, since system-level optimizations can also be applied upon our algorithm.
+
+Several other works also consider compressing KV cache by evicting tokens. 
+H2O~\citep{h2o} retains only a small portion of tokens that contribute significantly to the attention scores. Similarly, Scissorhands~\citep{liu2024scissorhands} exploit the persistence of the importance hypothesis in KV cache sparsification.  
+StreamingLLM~\citep{xiao2023efficient} is based on the observation of ``attention sink'' and maintains only a few initial tokens to preserve performance. Unlike these works, our \kivi{} retains all input tokens and compresses them into lower precision. This line of work is orthogonal to ours, as they can also be combined together.
