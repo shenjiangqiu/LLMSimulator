@@ -3,6 +3,7 @@
 #include "common/type.h"
 #include "dram/dram_interface.h"
 #include "dram/dram_request.h"
+#include "dram/nearbank/nearbank_pim.h"
 #include "hardware/layer_impl.h"
 #include "module/tensor.h"
 
@@ -339,6 +340,7 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
   Tensor_Ptr v_cache = tensor.at(2);
 
   auto config = device->config;
+  auto& nb_config = config.nearbank_pim_config;
   hw_metric compute_peak_flops = config.pim_memory_bandwidth * config.pim_op_b;
   hw_metric memory_bandwidth = config.pim_memory_bandwidth;
   if(input->precision_byte == 1){
@@ -351,15 +353,11 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
   int attention_group_size = layer_info.attention_group_size;
 
   time_ns time = 0;
-
   int m, n, k;
   double flops = 0;
   double memory_size = 0;
   double total_flops = 0;
   double total_memory_size = 0;
-
-  time_ns compute_duration;
-  time_ns memory_duration;
   time_ns total_duration = 0;
 
   ExecStatus exec_status;
@@ -367,21 +365,27 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
     return exec_status;
   }
 
-  // Scoring //
   std::vector<Sequence::Ptr> seq_list = sequences_metadata->get_gen();
   Sequence::Ptr seq;
-
-  std::vector<int> shape = {1, head_dim};
-
   int num_seq = seq_list.size();
+
+  bool use_nearbank = nb_config.enable_nearbank_model;
+  NearbankPIMUnit::Ptr nearbank_unit = nullptr;
+  if (use_nearbank) {
+    nearbank_unit = NearbankPIMUnit::Create(nb_config);
+  }
 
   int accumul_len = 0;
   time_ns accumul_compute_duration = 0;
   time_ns accumul_memory_duration = 0;
 
+  // =========================================================================
+  // Scoring stage: Q @ K^T → attention scores
+  // GEMV(1, head_dim) @ (head_dim, seq_len) → (1, seq_len)
+  // Repeated for each KV head, multiplied by attention_group_size (for Q heads)
+  // =========================================================================
   for (int seq_idx = 0; seq_idx < num_seq; seq_idx++) {
     seq = seq_list.at(seq_idx);
-
     m = seq->num_process_token;
     k = head_dim;
     n = seq->current_len + seq->num_process_token;
@@ -389,16 +393,24 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
     for (int kv_idx = 0; kv_idx < num_kv_heads; kv_idx++) {
       flops = m * k * n * 2.0 * attention_group_size;
       total_flops += flops;
-
       memory_size = (k * n) * input->precision_byte;
       total_memory_size += memory_size;
 
-      compute_duration = flops / compute_peak_flops * 1000 * 1000 * 1000;
-      exec_status.compute_duration += compute_duration;
-      accumul_compute_duration += compute_duration;
+      if (use_nearbank && nb_config.enable_scoring_in_pim) {
+        NearbankGEMVResult gemv_result = nearbank_unit->computeGEMVLatency(
+            m, k, n, input->precision_byte);
+        time_ns gemv_latency = gemv_result.latency_ns * attention_group_size;
+        exec_status.compute_duration += gemv_latency;
+        accumul_compute_duration += gemv_latency;
+        accumul_memory_duration += gemv_result.rowbuffer_time_ns * attention_group_size;
+      } else {
+        time_ns comp_dur = flops / compute_peak_flops * 1000 * 1000 * 1000;
+        exec_status.compute_duration += comp_dur;
+        accumul_compute_duration += comp_dur;
 
-      memory_duration = memory_size / memory_bandwidth * 1000 * 1000 * 1000;
-      accumul_memory_duration += memory_duration;
+        time_ns mem_dur = memory_size / memory_bandwidth * 1000 * 1000 * 1000;
+        accumul_memory_duration += mem_dur;
+      }
     }
     int _n = (n + 3) / 4 * 4;
     accumul_len += _n;
@@ -411,27 +423,55 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
         issueRamulator(device, LayerType::ATTENTION_GEN, ProcessorType::PIM,
                        DRAMRequestType::kGEMV, PIMOperandType::kSrc, k_cache);
     exec_status += temp;
-    accumul_memory_duration = temp.memory_duration;
-  }
-  else {
+    if (!use_nearbank) {
+      accumul_memory_duration = temp.memory_duration;
+    }
+  } else {
     k_cache->setShape({accumul_len, head_dim * num_kv_heads});
     ExecStatus temp;
     temp = getIdealMemoryStatus(device, ProcessorType::PIM, DRAMRequestType::kRead, k_cache);
     exec_status += temp;
   }
 
-  double opb = total_flops / total_memory_size;
-  exec_status.total_duration += accumul_memory_duration * opb;
+  if (!use_nearbank) {
+    double opb = total_flops / total_memory_size;
+    exec_status.total_duration += accumul_memory_duration * opb;
+  } else {
+    exec_status.total_duration += std::max(accumul_compute_duration, accumul_memory_duration);
+  }
 
-  // Softmax //
+  // =========================================================================
+  // Softmax stage: always on GPU (not modeled by PIM)
+  // =========================================================================
+  // (Softmax computation time is implicit in the original model; we keep it
+  //  as zero when using nearbank since the user's experiments define softmax
+  //  and score@V on GPU for hybrid scenarios)
+  if (!use_nearbank || nb_config.enable_softmax_in_pim) {
+    for (int seq_idx = 0; seq_idx < num_seq; seq_idx++) {
+      time_ns softmax_dur = 0;
+      seq = seq_list.at(seq_idx);
+      m = seq->num_process_token;
+      n = seq->current_len + seq->num_process_token;
+      double softmax_flops = 7.0 * m * n * num_heads;
+      softmax_dur = softmax_flops / compute_peak_flops * 1000 * 1000 * 1000;
+      if (!use_nearbank) {
+        exec_status.total_duration += softmax_dur;
+      }
+    }
+  }
 
-  // Context //
+  // =========================================================================
+  // Context stage: scores @ V → output
+  // GEMV(1, seq_len) @ (seq_len, head_dim) → (1, head_dim)
+  // =========================================================================
+
+  // Reset accumulators for context stage
+  time_ns ctx_compute_duration = 0;
+  time_ns ctx_memory_duration = 0;
   accumul_len = 0;
-  accumul_compute_duration = 0;
-  accumul_memory_duration = 0;
+
   for (int seq_idx = 0; seq_idx < num_seq; seq_idx++) {
     seq = seq_list.at(seq_idx);
-
     m = seq->num_process_token;
     k = seq->current_len + seq->num_process_token;
     n = head_dim;
@@ -439,16 +479,21 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
     for (int kv_idx = 0; kv_idx < num_kv_heads; kv_idx++) {
       flops = m * k * n * 2.0 * attention_group_size;
       total_flops += flops;
-
       memory_size = (k * n) * input->precision_byte;
       total_memory_size += memory_size;
 
-      compute_duration = flops / compute_peak_flops * 1000 * 1000 * 1000;
-      exec_status.compute_duration += compute_duration;
-      accumul_compute_duration += compute_duration;
-
-      memory_duration = memory_size / memory_bandwidth * 1000 * 1000 * 1000;
-      accumul_memory_duration += memory_duration;
+      if (use_nearbank && nb_config.enable_context_in_pim) {
+        NearbankGEMVResult gemv_result = nearbank_unit->computeGEMVLatency(
+            m, k, n, input->precision_byte);
+        time_ns gemv_latency = gemv_result.latency_ns * attention_group_size;
+        ctx_compute_duration += gemv_latency;
+        ctx_memory_duration += gemv_result.rowbuffer_time_ns * attention_group_size;
+      } else {
+        time_ns comp_dur = flops / compute_peak_flops * 1000 * 1000 * 1000;
+        ctx_compute_duration += comp_dur;
+        time_ns mem_dur = memory_size / memory_bandwidth * 1000 * 1000 * 1000;
+        ctx_memory_duration += mem_dur;
+      }
     }
     int _k = (k + 3) / 4 * 4;
     accumul_len += _k;
@@ -461,19 +506,23 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
         issueRamulator(device, LayerType::ATTENTION_GEN, ProcessorType::PIM,
                        DRAMRequestType::kGEMV, PIMOperandType::kSrc, v_cache);
     exec_status += temp;
-    accumul_memory_duration = temp.memory_duration;
-  }
-  else{
+    if (!use_nearbank) {
+      ctx_memory_duration = temp.memory_duration;
+    }
+  } else {
     v_cache->setShape({accumul_len, head_dim * num_kv_heads});
     ExecStatus temp;
     temp = getIdealMemoryStatus(device, ProcessorType::PIM, DRAMRequestType::kRead, v_cache);
     exec_status += temp;
   }
 
-  opb = total_flops / total_memory_size;
-  exec_status.total_duration += accumul_memory_duration * opb;
-
-  // exec_status.total_duration = total_duration;
+  if (!use_nearbank) {
+    double opb = total_flops / total_memory_size;
+    exec_status.total_duration += ctx_memory_duration * opb;
+  } else {
+    exec_status.total_duration += std::max(ctx_compute_duration, ctx_memory_duration);
+    exec_status.compute_duration += ctx_compute_duration;
+  }
 
   exec_status.compute_util = 1000.0 * 1000.0 * 1000.0 * total_flops /
                              compute_peak_flops / exec_status.total_duration;

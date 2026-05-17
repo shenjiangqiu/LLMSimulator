@@ -1,6 +1,7 @@
 add_library(dram STATIC)
 
 add_subdirectory(pimkernel)
+add_subdirectory(nearbank)
 add_subdirectory(ramulator2)
 
 target_sources(

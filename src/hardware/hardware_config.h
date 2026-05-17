@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "common/type.h"
+#include "dram/nearbank/nearbank_config.h"
 #include "hardware/base.h"
 
 namespace llm_system {
@@ -50,7 +51,8 @@ class SystemConfig {
                  bool use_inject_rate = false,
                  int request_per_second = 10,
                  int num_cube = 5,
-                 int num_logic_cube = 5
+                 int num_logic_cube = 5,
+                 NearbankPIMConfig nearbank_pim_config = NearbankPIMConfig()
                 )
       : gpu_gen(gpu_gen),
         num_node(num_node),
@@ -86,7 +88,8 @@ class SystemConfig {
         use_inject_rate(use_inject_rate),
         request_per_second(request_per_second),
         num_cube(num_cube),
-        num_logic_cube(num_logic_cube){
+        num_logic_cube(num_logic_cube),
+        nearbank_pim_config(nearbank_pim_config){
           logic_memory_bandwidth = memory_bandwidth * logic_x;
           pim_memory_bandwidth = memory_bandwidth * pim_x;
         };
@@ -156,6 +159,8 @@ class SystemConfig {
 
   int num_cube; //8: for HBM3E (B100), 5 for HBM3 (H100)
   int num_logic_cube;
+
+  NearbankPIMConfig nearbank_pim_config;
   // Device
 };
 

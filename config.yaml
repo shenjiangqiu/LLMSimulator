@@ -1,48 +1,94 @@
 model:
-  model_name: deepseekV3
+  model_name: mixtral
 
 system:
-  gpu_gen: B100 # e.g. A100, H100, B100, B200 (currently only support 4 generation)
+  gpu_gen: B100
   nvlink_gen: 5
   infiniband_gen: 800
   num_node: 1
-  num_device: 8
-  processor_type: GPU
+  num_device: 4
+  processor_type: GPU+PIM
   distribution:
     expert_tensor_degree: 1
     none_expert_tensor_degree: 1
   optimization:
-    parallel_execution: off
+    parallel_execution: on
     hetero_subbatch: off
     disagg_system: off
     use_low_unit_moe_only: off
-    use_ramulator: off
-    compressed_kv: on
-    use_absorb: on
-    use_flash_mla: on
-    use_flash_attention: on
-    reuse_kv_cache: on
+    use_ramulator: on
+    compressed_kv: off
+    use_absorb: off
+    use_flash_mla: off
+    use_flash_attention: off
+    reuse_kv_cache: off
     kv_cache_reuse_rate: 0.0
     prefill_mode: off
     decode_mode: on
 
 serving:
-  max_batch_size: 32
+  max_batch_size: 8
   max_process_token: 0
 
 simulation:
   data: synthesis
-  input_len: 1024
-  output_len: 10
+  input_len: 256
+  output_len: 5
   precision_byte: 1
   skewness: 0.0
-  iter: 5
+  iter: 1
   injection_rate: 0
   exit_out_of_memory: off
-  mem_cap_limit: off # if memory usage exceed memory capacity, batchsize modifies
+  mem_cap_limit: off
 
 log:
   print_log: on
   export_gantt: off
-  output_directory: ../data/
+  output_directory: ./data/
   gantt_directory: ./gantt
+
+# =============================================================================
+# Nearbank PIM Configuration
+# =============================================================================
+# Models near-bank processing-in-memory units where each DRAM bank has a simple
+# processing element (PE) that performs GEMV operations locally.
+#
+# Latency model: 
+#   Data read from DRAM arrays → row buffer (pipelined)
+#   PE computes on row buffer data → result
+#   latency = first_rb_fill + max(remaining_fill, total_pe_compute)
+nearbank_pim:
+  # Enable near-bank PIM modeling (vs original analytical model)
+  enable_nearbank_model: true
+  
+  # Number of PIM-enabled banks
+  num_pim_banks: 256
+  
+  # Number of PIM cubes (HBM stacks)
+  num_pim_cubes: 8
+  
+  # Channels per cube
+  channels_per_cube: 32
+  
+  # Row buffer size in bytes (data loaded per DRAM row activation)
+  rowbuffer_size_bytes: 2048
+  
+  # PE width: bytes processed per PE cycle (16B = 128-bit ALU)
+  pe_width_bytes: 16.0
+  
+  # PE cycle time in nanoseconds (0.5ns = 2GHz)
+  pe_cycle_time_ns: 0.5
+  
+  # DRAM array to row buffer bandwidth per bank (B/s)
+  # HBM3: ~32 GB/s per bank
+  dram_to_rb_bw_per_bank: 32000000000.0
+  
+  # --- Feature toggles for experiment scenarios ---
+  # Process softmax in PIM (false = softmax on GPU)
+  enable_softmax_in_pim: false
+  
+  # Process context stage (score@V GEMV) in PIM
+  enable_context_in_pim: true
+  
+  # Process scoring stage (Q@K^T GEMV) in PIM
+  enable_scoring_in_pim: true
