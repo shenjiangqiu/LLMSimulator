@@ -57,6 +57,20 @@ struct NearbankPIMConfig {
     // Process scoring stage (Q@K^T) in PIM (true = GEMV in PIM)
     bool enable_scoring_in_pim = true;
 
+    // --- Asymmetric Quantization ---
+    // When enabled, models the extra reduction terms needed for
+    // asymmetric (affine) quantized dot products:
+    //   Q·K ≈ s_Q·s_K · [ Σq̂k̂ - z_K·Σq̂ - z_Q·Σk̂ + d·z_Q·z_K ]
+    // The reduction sums (Σq̂, Σk̂) are computed in PE alongside the
+    // main GEMV, reusing the same data stream — zero extra DRAM reads.
+    bool enable_asymmetric_quant = false;
+
+    // Zero point for Q matrix (dequant: q = s_Q * (q̂ - z_Q))
+    hw_metric zero_point_q = 0.0;
+
+    // Zero point for K matrix (dequant: k = s_K * (k̂ - z_K))
+    hw_metric zero_point_k = 0.0;
+
     // --- Derived Values (computed after config is set) ---
     // PE throughput in bytes/second = pe_width_bytes / pe_cycle_time_ns * 1e9
     hw_metric getPEThroughput() const {

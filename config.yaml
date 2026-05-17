@@ -92,3 +92,12 @@ nearbank_pim:
   
   # Process scoring stage (Q@K^T GEMV) in PIM
   enable_scoring_in_pim: true
+
+  # --- Asymmetric Quantization ---
+  # Models extra reduction terms for asymmetric (affine) quantized dot products.
+  # Q·K ≈ s_Q·s_K · [ Σq̂k̂ - z_K·Σq̂ - z_Q·Σk̂ + d·z_Q·z_K ]
+  # Reduction sums reuse the same data stream — zero extra DRAM reads,
+  # only PE compute time increases.
+  enable_asymmetric_quant: false
+  zero_point_q: 0.0
+  zero_point_k: 0.0

@@ -307,6 +307,128 @@ void test_config_validation() {
     }
 }
 
+// =============================================================================
+// Test 9: Asymmetric quantization reduction overhead
+// =============================================================================
+void test_asymmetric_quant() {
+    std::cout << "\n=== Test: Asymmetric Quantization Reduction ===" << std::endl;
+
+    NearbankPIMConfig config;
+    config.num_pim_banks = 256;
+
+    // ---- disabled (baseline) ----
+    {
+        config.enable_asymmetric_quant = false;
+        auto unit = NearbankPIMUnit::Create(config);
+        auto result = unit->computeGEMVLatency(1, 128, 256, 1);
+        std::cout << "  AsymQuant OFF: " << result.description << std::endl;
+        check(result.reduction_time_ns == 0, "No reduction time when disabled");
+        check(result.reduction_ops == 0, "No reduction ops when disabled");
+        check(result.latency_ns == result.base_gemv_time_ns,
+              "latency == base_gemv_time when disabled");
+    }
+
+    // ---- enabled ----
+    {
+        config.enable_asymmetric_quant = true;
+        config.zero_point_q = 1.0;
+        config.zero_point_k = 2.0;
+        auto unit = NearbankPIMUnit::Create(config);
+        auto result = unit->computeGEMVLatency(1, 128, 256, 1);
+        std::cout << "  AsymQuant ON:  " << result.description << std::endl;
+        check(result.reduction_time_ns > 0, "Reduction time present when enabled");
+        check(result.reduction_ops > 0, "Reduction ops present when enabled");
+        check(result.latency_ns >= result.base_gemv_time_ns,
+              "Total latency >= base GEMV time");
+    }
+
+    // ---- reduction ops match formula: (M + N) * K ----
+    {
+        int M = 4, K = 128, N = 512;
+        config.enable_asymmetric_quant = true;
+        auto unit = NearbankPIMUnit::Create(config);
+        auto result = unit->computeGEMVLatency(M, K, N, 1);
+        double expected_red = static_cast<double>(M + N) * K;
+        check(std::abs(result.reduction_ops - expected_red) < 0.01,
+              "reduction_ops = (M+N)*K");
+    }
+
+    // ---- reduction overhead follows (M+N)/(M*N) pattern ----
+    // For decode (M=1, N large): overhead ≈ 1 + 1/N ≈ O(N)/O(N) — significant
+    // For prefill (M>1): overhead ≈ 1/M + 1/N — amortized
+    {
+        config.enable_asymmetric_quant = true;
+        auto unit = NearbankPIMUnit::Create(config);
+
+        auto result_off = [&]() {
+            config.enable_asymmetric_quant = false;
+            auto u = NearbankPIMUnit::Create(config);
+            return u->computeGEMVLatency(1, 128, 4096, 2);
+        }();
+
+        config.enable_asymmetric_quant = true;
+        auto unit2 = NearbankPIMUnit::Create(config);
+        auto result_on = unit2->computeGEMVLatency(1, 128, 4096, 2);
+
+        double overhead_pct = (result_on.latency_ns - result_off.latency_ns)
+                              / result_off.latency_ns * 100;
+        std::cout << "  Long seq (N=4096) overhead: " << overhead_pct << "%" << std::endl;
+
+        // Overhead scales as (M+N)/M*N, for M=1 this is ~100% of data ops
+        // But reduction is ADD-only vs main GEMV which is MAC, so < 100%
+        check(overhead_pct > 0 && overhead_pct < 100,
+              "Reduction overhead between 0-100% for long sequences");
+    }
+
+    // ---- overhead is predictable from (M+N)/(M*K+N*K+M*N) ratio ----
+    // The key insight: reduction adds (M+N)*K element ops to the PE,
+    // while main GEMV has M*K + K*N + M*N elements of MAC work.
+    // For attention decode (M=1): overhead ≈ N*K / K*N = 100% — significant!
+    // For prefill (M large): overhead ≈ (M+N)*K / (M*K*N) → small fraction.
+    // This is expected behavior: asymmetric quant trades memory savings
+    // (2-bit KV) for extra PE ALU work at inference time.
+    {
+        config.enable_asymmetric_quant = true;
+        auto unit = NearbankPIMUnit::Create(config);
+
+        auto result_off = [&]() {
+            config.enable_asymmetric_quant = false;
+            auto u = NearbankPIMUnit::Create(config);
+            return u->computeGEMVLatency(128, 128, 4096, 2);
+        }();
+
+        config.enable_asymmetric_quant = true;
+        auto unit2 = NearbankPIMUnit::Create(config);
+        auto result_on = unit2->computeGEMVLatency(128, 128, 4096, 2);
+
+        double overhead_pct = (result_on.latency_ns - result_off.latency_ns)
+                              / result_off.latency_ns * 100;
+        std::cout << "  Prefill (M=128,N=4096) overhead: " << overhead_pct << "%" << std::endl;
+        check(overhead_pct > 0, "Reduction adds positive overhead");
+    }
+
+    // ---- short sequence: reduction minimal ----
+    {
+        config.enable_asymmetric_quant = true;
+        auto unit = NearbankPIMUnit::Create(config);
+
+        auto result_off = [&]() {
+            config.enable_asymmetric_quant = false;
+            auto u = NearbankPIMUnit::Create(config);
+            return u->computeGEMVLatency(1, 128, 128, 2);
+        }();
+
+        config.enable_asymmetric_quant = true;
+        auto unit2 = NearbankPIMUnit::Create(config);
+        auto result_on = unit2->computeGEMVLatency(1, 128, 128, 2);
+
+        double overhead_pct = (result_on.latency_ns - result_off.latency_ns)
+                              / result_off.latency_ns * 100;
+        std::cout << "  Short seq (N=128) overhead: " << overhead_pct << "%" << std::endl;
+        check(overhead_pct > 0, "Reduction always adds some overhead");
+    }
+}
+
 int main() {
     std::cout << "============================================================" << std::endl;
     std::cout << "NearbankPIMUnit Test Suite" << std::endl;
@@ -320,6 +442,7 @@ int main() {
     test_edge_cases();
     test_pipelining();
     test_config_validation();
+    test_asymmetric_quant();
 
     std::cout << "\n============================================================" << std::endl;
     std::cout << "RESULTS: " << tests_passed << " passed, "

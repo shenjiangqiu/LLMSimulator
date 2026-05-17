@@ -15,8 +15,11 @@ struct NearbankGEMVResult {
     time_ns latency_ns = 0.0;          // Total latency for one bank's work
     time_ns rowbuffer_time_ns = 0.0;   // Time spent filling row buffers (total)
     time_ns pe_compute_time_ns = 0.0;  // Time spent in PE computation (total)
+    time_ns base_gemv_time_ns = 0.0;   // Latency of main GEMV only (w/o reduction)
+    time_ns reduction_time_ns = 0.0;   // Extra PE time for reduction sums
     hw_metric total_bytes = 0.0;       // Total bytes processed by all banks
     hw_metric bytes_per_bank = 0.0;    // Bytes processed per bank
+    hw_metric reduction_ops = 0.0;     // Reduction ops: (M+N)*K element-sums
     int num_rowbuffer_fills = 0;       // Number of row buffer fills per bank
     std::string description;           // Human-readable summary
 
@@ -24,7 +27,10 @@ struct NearbankGEMVResult {
         latency_ns += rhs.latency_ns;
         rowbuffer_time_ns += rhs.rowbuffer_time_ns;
         pe_compute_time_ns += rhs.pe_compute_time_ns;
+        base_gemv_time_ns += rhs.base_gemv_time_ns;
+        reduction_time_ns += rhs.reduction_time_ns;
         total_bytes += rhs.total_bytes;
+        reduction_ops += rhs.reduction_ops;
         return *this;
     }
 };

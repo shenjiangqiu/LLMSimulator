@@ -99,27 +99,59 @@ NearbankGEMVResult NearbankPIMUnit::computeGEMVLatency(
     // Total PE time (without pipelining)
     result.pe_compute_time_ns = result.bytes_per_bank / pe_width * pe_cycle;
 
-    // --- Step 5: Pipelined latency ---
+    // --- Step 5: Pipelined latency (base GEMV only) ---
     if (result.bytes_per_bank <= rb_size) {
-        // Single row buffer case: no pipeline overlap between fills,
-        // but compute and fill can partially overlap since PE can start
-        // as soon as first data arrives
-        // Simplified: max of fill time and compute time
         double fill_time = result.bytes_per_bank / dram_bw * 1e9;
         double compute_time = result.bytes_per_bank / pe_width * pe_cycle;
-        result.latency_ns = std::max(fill_time, compute_time);
+        result.base_gemv_time_ns = std::max(fill_time, compute_time);
     } else {
-        // Multi-rowbuffer pipelined case:
-        // Fill first row buffer, then max(remaining fills, total PE compute)
         double first_fill = time_per_rb_fill;
         double remaining_fill =
             (result.num_rowbuffer_fills - 1) * time_per_rb_fill;
         double total_pe = result.pe_compute_time_ns;
-
-        result.latency_ns = first_fill + std::max(remaining_fill, total_pe);
+        result.base_gemv_time_ns =
+            first_fill + std::max(remaining_fill, total_pe);
     }
 
-    // --- Step 6: Build description ---
+    // --- Step 6: Asymmetric quantization reduction overhead ---
+    // Q·K ≈ s_Q·s_K · [ Σq̂k̂ - z_K·Σq̂ - z_Q·Σk̂ + d·z_Q·z_K ]
+    //
+    // Extra work beyond main GEMV (Σq̂k̂):
+    //   z_K · Σq̂:  M*K element-sums across the K dimension of Q
+    //   z_Q · Σk̂:  N*K element-sums across the K dimension of K
+    //   d·z_Q·z_K: constant, negligible
+    //
+    // These sums are computed in PE alongside the main GEMV on the same
+    // data — the rowbuffer already contains Q and K rows.  So only PE
+    // time increases, not DRAM read time.
+    if (config_.enable_asymmetric_quant) {
+        double reduction_elements = static_cast<double>(M) * K   // Σq̂
+                                 + static_cast<double>(N) * K;  // Σk̂
+        result.reduction_ops = reduction_elements;
+
+        // Reduction distributed across banks like main GEMV
+        double red_per_bank = reduction_elements / num_banks * element_size_bytes;
+        result.reduction_time_ns = red_per_bank / pe_width * pe_cycle;
+
+        // PE time with reduction (no extra DRAM reads)
+        double total_pe_all = result.pe_compute_time_ns + result.reduction_time_ns;
+
+        // Recompute pipelined latency with combined PE time
+        if (result.bytes_per_bank <= rb_size) {
+            double fill_time = result.bytes_per_bank / dram_bw * 1e9;
+            result.latency_ns = std::max(fill_time, total_pe_all);
+        } else {
+            double first_fill = time_per_rb_fill;
+            double remaining_fill =
+                (result.num_rowbuffer_fills - 1) * time_per_rb_fill;
+            result.latency_ns =
+                first_fill + std::max(remaining_fill, total_pe_all);
+        }
+    } else {
+        result.latency_ns = result.base_gemv_time_ns;
+    }
+
+    // --- Step 7: Build description ---
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(2);
     oss << "GEMV(" << M << "x" << K << " @ " << K << "x" << N
@@ -129,7 +161,12 @@ NearbankGEMVResult NearbankPIMUnit::computeGEMVLatency(
         << " rb_fills=" << result.num_rowbuffer_fills
         << " latency=" << result.latency_ns << "ns"
         << " (rb=" << result.rowbuffer_time_ns
-        << "ns, pe=" << result.pe_compute_time_ns << "ns)";
+        << "ns, pe=" << result.pe_compute_time_ns << "ns";
+    if (config_.enable_asymmetric_quant) {
+        oss << ", red=" << result.reduction_time_ns << "ns"
+            << ", red_ops=" << result.reduction_ops;
+    }
+    oss << ")";
     result.description = oss.str();
 
     return result;
