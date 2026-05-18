@@ -27,13 +27,13 @@ system:
     decode_mode: on
 
 serving:
-  max_batch_size: 8
+  max_batch_size: 64
   max_process_token: 0
 
 simulation:
   data: synthesis
-  input_len: 256
-  output_len: 5
+  input_len: 16400
+  output_len: 128
   precision_byte: 1
   skewness: 0.0
   iter: 1
