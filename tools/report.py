@@ -133,19 +133,20 @@ def verify_pim_cycles(rows):
     print(f"  Per decode step (Q@K + score@V): {2*per_gemv/1000:.2f}us")
     print(f"  With {kv_heads} KV heads and batch=64: {2*per_gemv*kv_heads/1000:.2f}us per step total")
 
-    # Compare with reported
-    for r in rows:
-        if 'fp16_pim' in r['exp']:
-            reported_qk = r['qk_us']
-            reported_sv = r['score_v_us']
-            print(f"\n  Reported: Q@K={reported_qk:.2f}us, Score@V={reported_sv:.2f}us")
-            # Reported is cumulative across ALL 128 steps
-            per_step_qk = reported_qk / 128
-            per_step_sv = reported_sv / 128
-            print(f"  Per step: Q@K={per_step_qk:.3f}us, Score@V={per_step_sv:.3f}us")
-            print(f"  Analytical per GEMV: {per_gemv/1000:.3f}us")
-            ratio = per_step_qk / (per_gemv/1000 * kv_heads)
-            print(f"  Ratio reported/analytical: {ratio:.2f}x")
+  # Compare with reported
+  for r in rows:
+    if 'fp16_pim' in r['exp']:
+      reported_qk = r['qk_us']
+      print(f"\n  Reported: Q@K={reported_qk:.2f}us (per step, all KV heads × batch)")
+      # Analytical per step (all KV heads): per_gemv * kv_heads per direction
+      analytical_step = per_gemv / 1000 * kv_heads
+      print(f"  Analytical per step: {analytical_step:.2f}us (per GEMV {per_gemv/1000:.2f}us × {kv_heads} KV heads)")
+      ratio = reported_qk / analytical_step
+      print(f"  Ratio reported/analytical: {ratio:.2f}x")
+      if 0.9 < ratio < 1.1:
+        print("  ✓ PIM cycle verification PASSED")
+      else:
+        print("  ⚠ PIM cycle verification — check config")
 
 if __name__ == '__main__':
     main()

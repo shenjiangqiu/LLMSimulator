@@ -507,6 +507,22 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
     }
   }
 
+  // KV cache quantization overhead (decode mode, asymmetric quant on GPU)
+  // Each new token's K and V must be quantized before storing to cache.
+  // d_kv = num_kv_heads * head_dim elements per matrix
+  // Ops: 2 subtracts + 2 multiplies per element (asymmetric quant)
+  // Memory: read FP16 K,V + write quantized K,V
+  {
+    int d_kv = num_kv_heads * head_dim;
+    double kv_elements = 2.0 * d_kv * num_seq;  // K + V, all sequences
+    double kv_flops = 4.0 * kv_elements;          // sub + mul per element
+    double kv_bytes = kv_elements * 2.0;           // FP16 read
+    time_ns kv_comp = kv_flops / gpu_compute_peak_flops * 1000 * 1000 * 1000;
+    time_ns kv_mem = kv_bytes / gpu_memory_bandwidth * 1000 * 1000 * 1000;
+    exec_status.kv_quant_duration = std::max(kv_comp, kv_mem);
+    exec_status.kv_quant_bytes = kv_bytes;
+  }
+
   return exec_status;
 };
 
