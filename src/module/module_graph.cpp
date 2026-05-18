@@ -304,6 +304,11 @@ void TopModuleGraph::set_pop_status() {
   status.flops += exec_status.flops;
   status.memory_size += exec_status.memory_size;
 
+  status.qk_duration += exec_status.qk_duration;
+  status.softmax_duration += exec_status.softmax_duration;
+  status.score_v_duration += exec_status.score_v_duration;
+  status.kv_quant_duration += exec_status.kv_quant_duration;
+
   status.opb = exec_status.opb;
 }
 

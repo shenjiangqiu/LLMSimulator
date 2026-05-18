@@ -17,6 +17,15 @@ struct ExecStatus {
   time_ns compute_duration = 0.0;
   time_ns memory_duration = 0.0;
 
+  // Per-stage attention timing breakdown (0 for non-attention ops)
+  time_ns qk_duration = 0.0;
+  time_ns softmax_duration = 0.0;
+  time_ns score_v_duration = 0.0;
+
+  // KV quantization overhead (decode mode, GPU)
+  time_ns kv_quant_duration = 0.0;
+  hw_metric kv_quant_bytes = 0.0;
+
   hw_metric flops = 0.0;
   hw_metric memory_size = 0.0;
 
@@ -41,7 +50,13 @@ struct ExecStatus {
   bool parallel_execution = false;
 
   ExecStatus& operator+=(const ExecStatus& rhs) {
+    total_duration += rhs.total_duration;
     memory_duration += rhs.memory_duration;
+    qk_duration += rhs.qk_duration;
+    softmax_duration += rhs.softmax_duration;
+    score_v_duration += rhs.score_v_duration;
+    kv_quant_duration += rhs.kv_quant_duration;
+    kv_quant_bytes += rhs.kv_quant_bytes;
     generic_read_cmd += rhs.generic_read_cmd;
     compute_pim_cmd += rhs.compute_pim_cmd;
     move_pim_cmd += rhs.compute_pim_cmd;
@@ -114,6 +129,11 @@ class StatusBoard {
   std::vector<std::vector<int>> output_tensor_vec_shape;
   ProcessorType processor_type;
   bool parallel_execution = false;
+
+  time_ns qk_duration = 0.0;
+  time_ns softmax_duration = 0.0;
+  time_ns score_v_duration = 0.0;
+  time_ns kv_quant_duration = 0.0;
 };
 
 }  // namespace llm_system

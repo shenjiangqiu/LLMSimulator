@@ -101,69 +101,7 @@ ExecStatus AttentionGenExecutionGPU(Device_Ptr device,
   exec_status.total_duration +=
       std::max(accumul_compute_duration, accumul_memory_duration);
 
-  // Softmax //
-  for (int seq_idx = 0; seq_idx < num_seq; seq_idx++) {
-    time_ns compute_duration = 0;
-    time_ns memory_duration = 0;
-
-    seq = seq_list.at(seq_idx);
-
-    m = seq->num_process_token;
-    n = seq->current_len + seq->num_process_token;
-
-    flops = 7.0 * m * n * num_heads; // scale + mask + softmax
-    total_flops += flops;
-
-    compute_duration = flops / compute_peak_flops * 1000 * 1000 * 1000;
-
-    exec_status.total_duration += compute_duration;
-  }
-
-  // Context //
-  accumul_len = 0;
-  accumul_compute_duration = 0;
-  accumul_memory_duration = 0;
-  for (int seq_idx = 0; seq_idx < num_seq; seq_idx++) {
-    seq = seq_list.at(seq_idx);
-
-    m = seq->num_process_token;
-    k = seq->current_len + seq->num_process_token;
-    n = head_dim;
-
-    for (int kv_idx = 0; kv_idx < num_kv_heads; kv_idx++) {
-      flops = m * k * n * 2.0 * attention_group_size;
-      total_flops += flops;
-
-      memory_size = 1.0 * (m * k * num_heads / num_kv_heads + k * n + m * n * num_heads / num_kv_heads) * input->precision_byte;
-      total_memory_size += memory_size;
-
-      compute_duration = flops / compute_peak_flops * 1000 * 1000 * 1000;
-      exec_status.compute_duration += compute_duration;
-      accumul_compute_duration += compute_duration;
-
-      memory_duration = memory_size / memory_bandwidth * 1000 * 1000 * 1000;
-      accumul_memory_duration += memory_duration;
-    }
-    accumul_len += k;
-  }
-
-  if (use_ramulator) {
-    v_cache->setShape({accumul_len, head_dim * num_kv_heads});
-    ExecStatus temp;
-    temp =
-        issueRamulator(device, LayerType::ATTENTION_GEN, ProcessorType::GPU,
-                       DRAMRequestType::kRead, PIMOperandType::kDRAM, v_cache);
-    exec_status += temp;
-    accumul_memory_duration = temp.memory_duration;
-  }  
-  else {
-    v_cache->setShape({accumul_len, head_dim * num_kv_heads});
-    ExecStatus temp;
-    temp = getIdealMemoryStatus(device, ProcessorType::GPU, DRAMRequestType::kRead, v_cache);
-    exec_status += temp;
-  }
-
-  exec_status.total_duration +=
+  exec_status.qk_duration =
       std::max(accumul_compute_duration, accumul_memory_duration);
 
   exec_status.compute_util = 1000.0 * 1000.0 * 1000.0 * total_flops /
@@ -173,6 +111,11 @@ ExecStatus AttentionGenExecutionGPU(Device_Ptr device,
 
   exec_status.flops = total_flops;
   exec_status.memory_size = total_memory_size;
+
+  // Per-stage timing for reporting
+  exec_status.qk_duration = accumul_compute_duration + accumul_memory_duration;
+  // softmax_duration set below
+  // score_v_duration set below
 
   return exec_status;
 };
@@ -451,9 +394,7 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
   // =========================================================================
   // Softmax stage
   // =========================================================================
-  // When enable_softmax_in_pim is false and nearbank is active,
-  // softmax runs on GPU using GPU compute throughput.
-  // When nearbank is off, softmax is included in the PIM opb model.
+  time_ns softmax_accum = 0;
   if (!use_nearbank || nb_config.enable_softmax_in_pim) {
     for (int seq_idx = 0; seq_idx < num_seq; seq_idx++) {
       seq = seq_list.at(seq_idx);
@@ -463,11 +404,10 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
       if (!use_nearbank) {
         time_ns softmax_dur = softmax_flops / pim_compute_peak_flops * 1000 * 1000 * 1000;
         exec_status.total_duration += softmax_dur;
+        softmax_accum += softmax_dur;
       }
-      // nearbank + softmax_in_pim: softmax is already counted in PIM pipeline
     }
   } else if (use_nearbank) {
-    // nearbank on, softmax on GPU
     for (int seq_idx = 0; seq_idx < num_seq; seq_idx++) {
       seq = seq_list.at(seq_idx);
       m = seq->num_process_token;
@@ -475,8 +415,10 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
       double softmax_flops = 7.0 * m * n * num_heads;
       time_ns softmax_dur = softmax_flops / gpu_compute_peak_flops * 1000 * 1000 * 1000;
       exec_status.total_duration += softmax_dur;
+      softmax_accum += softmax_dur;
     }
   }
+  exec_status.softmax_duration = softmax_accum;
 
   // =========================================================================
   // Context stage: scores @ V → output
@@ -555,6 +497,15 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
 
   exec_status.flops = total_flops;
   exec_status.memory_size = total_memory_size;
+
+  // Per-stage timing
+  if (use_nearbank) {
+    exec_status.qk_duration = std::max(accumul_compute_duration, accumul_memory_duration);
+    exec_status.score_v_duration = std::max(ctx_compute_duration, ctx_memory_duration);
+    if (!nb_config.enable_softmax_in_pim) {
+      // softmax duration set in the softmax block above
+    }
+  }
 
   return exec_status;
 };

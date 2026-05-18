@@ -31,13 +31,14 @@ struct NearbankPIMConfig {
     hw_metric rowbuffer_size_bytes = 2048.0;
 
     // --- PE (Processing Element) Configuration ---
-    // PE width: number of bytes the PE can process per cycle
-    // e.g., 16 bytes = 128 bits per cycle
+    // FP16 PE: width and cycle time for float16 operations
     hw_metric pe_width_bytes = 16.0;
-
-    // PE cycle time in nanoseconds
-    // e.g., 0.5 ns = 2 GHz clock
     hw_metric pe_cycle_time_ns = 0.5;
+
+    // Low-bit PE: separate PE for 2-bit/4-bit quantized operations
+    // When kv_bits < 16, this PE handles the quantized K matrix operations
+    hw_metric pe_lowbit_width_bytes = 32.0;
+    hw_metric pe_lowbit_cycle_time_ns = 0.5;
 
     // --- Bandwidth Configuration ---
     // DRAM array to row buffer bandwidth per bank (bytes/second)

@@ -69,6 +69,11 @@ void TimeStamp::set_status(const StatusBoard& output_status) {
   status.flops = output_status.flops - status.flops;
   status.memory_size = output_status.memory_size - status.memory_size;
 
+  status.qk_duration = output_status.qk_duration - status.qk_duration;
+  status.softmax_duration = output_status.softmax_duration - status.softmax_duration;
+  status.score_v_duration = output_status.score_v_duration - status.score_v_duration;
+  status.kv_quant_duration = output_status.kv_quant_duration - status.kv_quant_duration;
+
   if (status.memory_size != 0) {
     status.opb = status.flops / status.memory_size;
   }
@@ -245,6 +250,13 @@ void TimeStamp::print_util() {
     std::cout << ", Logic";
   } else if (status.processor_type == ProcessorType::PIM) {
     std::cout << ", PIM";
+  }
+  if (status.qk_duration > 0 || status.softmax_duration > 0 ||
+      status.score_v_duration > 0 || status.kv_quant_duration > 0) {
+    std::cout << " | qk=" << status.qk_duration / 1000.0
+              << "us softmax=" << status.softmax_duration / 1000.0
+              << "us score_v=" << status.score_v_duration / 1000.0
+              << "us kv_quant=" << status.kv_quant_duration / 1000.0 << "us";
   }
 }
 
