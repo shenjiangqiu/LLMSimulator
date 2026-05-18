@@ -4,232 +4,205 @@
   "layer_duration_us": 103.35,
   "prefill_us": 0,
   "decode_us": 103.35,
-  "overhead_us": 0,
-  "operations": [
-    {
-      "indent": 1,
-      "name": "decoder_0",
-      "duration_us": 103.35,
-      "start_us": 0.0,
-      "end_us": 103.35,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0.78479mJ  | RD: 15.915mJ  | WR: 0.0063867mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.32667mJ  | Total: 16.706mJ | compute util: 0, memory util: 0, Op/B 2.4656"
-    },
-    {
-      "indent": 2,
-      "name": "input_layer_norm",
-      "duration_us": 0.00512,
-      "start_us": 0.0,
-      "end_us": 0.00512,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 2,
-      "name": "attention",
-      "duration_us": 39.479,
-      "start_us": 0.00512,
-      "end_us": 39.484,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0.33579mJ  | RD: 6.0993mJ  | WR: 0.0011405mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.1646mJ  | Total: 6.4362mJ | compute util: 0, memory util: 0, Op/B 3.2044"
-    },
-    {
-      "indent": 3,
-      "name": "attn_qkv_proj",
-      "duration_us": 9.098,
-      "start_us": 0.00512,
-      "end_us": 9.1031,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 6144) | ACT: 0.079352mJ  | RD: 1.4019mJ  | WR: 0.00068429mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.023153mJ  | Total: 1.4819mJ | compute util: 0, memory util: 0, Op/B 1.9984"
-    },
-    {
-      "indent": 4,
-      "name": "Linear",
-      "duration_us": 9.098,
-      "start_us": 0.00512,
-      "end_us": 9.1031,
-      "processor": "GPU",
-      "rest": "tensor(2, 4096) -> tensor(2, 6144) | ACT: 0.079352mJ  | RD: 1.4019mJ  | WR: 0.00068429mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.023153mJ  | Total: 1.4819mJ | compute util: 0.0063225, memory util: 0.69208, Op/B 1.9984, GPU"
-    },
-    {
-      "indent": 3,
-      "name": "self_attention",
-      "duration_us": 24.399,
-      "start_us": 9.1031,
-      "end_us": 33.502,
-      "processor": null,
-      "rest": "tensor(2, 6144) -> tensor(2, 4096) | ACT: 0.19966mJ  | RD: 3.7627mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.12602mJ  | Total: 3.9623mJ | compute util: 0, memory util: 0, Op/B 3.9309"
-    },
-    {
-      "indent": 4,
-      "name": "AttentionSplit",
-      "duration_us": 0.0,
-      "start_us": 9.1031,
-      "end_us": 9.1031,
-      "processor": null,
-      "rest": "tensor(2, 6144) -> tensor(0, 6144) tensor(2, 6144) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "AttentionSum",
-      "duration_us": 0.0,
-      "start_us": 9.1031,
-      "end_us": 9.1031,
-      "processor": "GPU",
-      "rest": "tensor(0, 6144) -> tensor(0, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0, GPU"
-    },
-    {
-      "indent": 4,
-      "name": "AttentionGen",
-      "duration_us": 24.399,
-      "start_us": 9.1031,
-      "end_us": 33.502,
-      "processor": "GPU",
-      "rest": "tensor(2, 6144) -> tensor(2, 4096) | ACT: 0.19966mJ  | RD: 3.7627mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.12602mJ  | Total: 3.9623mJ | compute util: 0.012832, memory util: 0.71407, Op/B 3.9309, GPU"
-    },
-    {
-      "indent": 4,
-      "name": "AttentionMerge",
-      "duration_us": 0.0,
-      "start_us": 33.502,
-      "end_us": 33.502,
-      "processor": null,
-      "rest": "tensor(0, 4096) tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 3,
-      "name": "attn_o_proj",
-      "duration_us": 5.9815,
-      "start_us": 33.502,
-      "end_us": 39.484,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0.05678mJ  | RD: 0.93474mJ  | WR: 0.00045619mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.015435mJ  | Total: 0.99197mJ | compute util: 0, memory util: 0, Op/B 1.998"
-    },
-    {
-      "indent": 4,
-      "name": "Linear",
-      "duration_us": 5.9815,
-      "start_us": 33.502,
-      "end_us": 39.484,
-      "processor": "GPU",
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0.05678mJ  | RD: 0.93474mJ  | WR: 0.00045619mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.015435mJ  | Total: 0.99197mJ | compute util: 0.0064111, memory util: 0.7019, Op/B 1.998, GPU"
-    },
-    {
-      "indent": 3,
-      "name": "all_reduce",
-      "duration_us": 0.0,
-      "start_us": 39.484,
-      "end_us": 39.484,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 2,
-      "name": "residual_1",
-      "duration_us": 0.006144,
-      "start_us": 39.484,
-      "end_us": 39.49,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 2,
-      "name": "post_attn_layer_norm",
-      "duration_us": 0.00512,
-      "start_us": 39.49,
-      "end_us": 39.495,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 2,
-      "name": "feedforward",
-      "duration_us": 63.85,
-      "start_us": 39.495,
-      "end_us": 103.35,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0.449mJ  | RD: 9.8157mJ  | WR: 0.0052462mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.16207mJ  | Total: 10.27mJ | compute util: 0, memory util: 0, Op/B 1.9978"
-    },
-    {
-      "indent": 3,
-      "name": "gate_proj",
-      "duration_us": 21.27,
-      "start_us": 39.495,
-      "end_us": 60.766,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 14336) | ACT: 0.15021mJ  | RD: 3.2704mJ  | WR: 0.0015967mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4222mJ | compute util: 0, memory util: 0, Op/B 1.9987"
-    },
-    {
-      "indent": 4,
-      "name": "Linear",
-      "duration_us": 21.27,
-      "start_us": 39.495,
-      "end_us": 60.766,
-      "processor": "GPU",
-      "rest": "tensor(2, 4096) -> tensor(2, 14336) | ACT: 0.15021mJ  | RD: 3.2704mJ  | WR: 0.0015967mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4222mJ | compute util: 0.00631, memory util: 0.69059, Op/B 1.9987, GPU"
-    },
-    {
-      "indent": 3,
-      "name": "activation",
-      "duration_us": 0.071,
-      "start_us": 60.766,
-      "end_us": 60.837,
-      "processor": "GPU",
-      "rest": "tensor(2, 14336) -> tensor(2, 14336) | ACT: 0mJ  | RD: 0.0031933mJ  | WR: 0.0015967mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0.00479mJ | compute util: 0, memory util: 0.30287, Op/B 0, GPU"
-    },
-    {
-      "indent": 3,
-      "name": "up_proj",
-      "duration_us": 21.27,
-      "start_us": 60.837,
-      "end_us": 82.107,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 14336) | ACT: 0.15021mJ  | RD: 3.2704mJ  | WR: 0.0015967mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4222mJ | compute util: 0, memory util: 0, Op/B 1.9987"
-    },
-    {
-      "indent": 4,
-      "name": "Linear",
-      "duration_us": 21.27,
-      "start_us": 60.837,
-      "end_us": 82.107,
-      "processor": "GPU",
-      "rest": "tensor(2, 4096) -> tensor(2, 14336) | ACT: 0.15021mJ  | RD: 3.2704mJ  | WR: 0.0015967mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4222mJ | compute util: 0.00631, memory util: 0.69059, Op/B 1.9987, GPU"
-    },
-    {
-      "indent": 3,
-      "name": "down_proj",
-      "duration_us": 21.238,
-      "start_us": 82.107,
-      "end_us": 103.35,
-      "processor": null,
-      "rest": "tensor(2, 14336) -> tensor(2, 4096) | ACT: 0.14858mJ  | RD: 3.2716mJ  | WR: 0.00045619mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4206mJ | compute util: 0, memory util: 0, Op/B 1.9987"
-    },
-    {
-      "indent": 4,
-      "name": "Linear",
-      "duration_us": 21.238,
-      "start_us": 82.107,
-      "end_us": 103.35,
-      "processor": "GPU",
-      "rest": "tensor(2, 14336) -> tensor(2, 4096) | ACT: 0.14858mJ  | RD: 3.2716mJ  | WR: 0.00045619mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4206mJ | compute util: 0.0063197, memory util: 0.69165, Op/B 1.9987, GPU"
-    },
-    {
-      "indent": 2,
-      "name": "all_reduce",
-      "duration_us": 0.0,
-      "start_us": 103.35,
-      "end_us": 103.35,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 2,
-      "name": "residual_1",
-      "duration_us": 0.006144,
-      "start_us": 103.35,
-      "end_us": 103.35,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    }
-  ]
+  "operations": {
+    "name": "decoder_0",
+    "duration_us": 103.35,
+    "start_us": 0.0,
+    "end_us": 103.35,
+    "stage": "decode",
+    "children": [
+      {
+        "name": "input_layer_norm",
+        "duration_us": 0.00512,
+        "start_us": 0.0,
+        "end_us": 0.00512,
+        "stage": "overhead"
+      },
+      {
+        "name": "attention",
+        "duration_us": 39.479,
+        "start_us": 0.00512,
+        "end_us": 39.484,
+        "stage": "decode",
+        "children": [
+          {
+            "name": "attn_qkv_proj",
+            "duration_us": 9.098,
+            "start_us": 0.00512,
+            "end_us": 9.1031,
+            "stage": "overhead",
+            "children": [
+              {
+                "name": "Linear",
+                "duration_us": 9.098,
+                "start_us": 0.00512,
+                "end_us": 9.1031,
+                "processor": "GPU",
+                "stage": "overhead"
+              }
+            ]
+          },
+          {
+            "name": "self_attention",
+            "duration_us": 24.399,
+            "start_us": 9.1031,
+            "end_us": 33.502,
+            "stage": "decode",
+            "children": [
+              {
+                "name": "AttentionSplit",
+                "duration_us": 0.0,
+                "start_us": 9.1031,
+                "end_us": 9.1031,
+                "stage": "overhead"
+              },
+              {
+                "name": "AttentionSum",
+                "duration_us": 0.0,
+                "start_us": 9.1031,
+                "end_us": 9.1031,
+                "processor": "GPU",
+                "stage": "prefill"
+              },
+              {
+                "name": "AttentionGen",
+                "duration_us": 24.399,
+                "start_us": 9.1031,
+                "end_us": 33.502,
+                "processor": "GPU",
+                "stage": "decode"
+              },
+              {
+                "name": "AttentionMerge",
+                "duration_us": 0.0,
+                "start_us": 33.502,
+                "end_us": 33.502,
+                "stage": "overhead"
+              }
+            ]
+          },
+          {
+            "name": "attn_o_proj",
+            "duration_us": 5.9815,
+            "start_us": 33.502,
+            "end_us": 39.484,
+            "stage": "overhead",
+            "children": [
+              {
+                "name": "Linear",
+                "duration_us": 5.9815,
+                "start_us": 33.502,
+                "end_us": 39.484,
+                "processor": "GPU",
+                "stage": "overhead"
+              }
+            ]
+          },
+          {
+            "name": "all_reduce",
+            "duration_us": 0.0,
+            "start_us": 39.484,
+            "end_us": 39.484,
+            "stage": "overhead"
+          }
+        ]
+      },
+      {
+        "name": "residual_1",
+        "duration_us": 0.006144,
+        "start_us": 39.484,
+        "end_us": 39.49,
+        "stage": "overhead"
+      },
+      {
+        "name": "post_attn_layer_norm",
+        "duration_us": 0.00512,
+        "start_us": 39.49,
+        "end_us": 39.495,
+        "stage": "overhead"
+      },
+      {
+        "name": "feedforward",
+        "duration_us": 63.85,
+        "start_us": 39.495,
+        "end_us": 103.35,
+        "stage": "overhead",
+        "children": [
+          {
+            "name": "gate_proj",
+            "duration_us": 21.27,
+            "start_us": 39.495,
+            "end_us": 60.766,
+            "stage": "overhead",
+            "children": [
+              {
+                "name": "Linear",
+                "duration_us": 21.27,
+                "start_us": 39.495,
+                "end_us": 60.766,
+                "processor": "GPU",
+                "stage": "overhead"
+              }
+            ]
+          },
+          {
+            "name": "activation",
+            "duration_us": 0.071,
+            "start_us": 60.766,
+            "end_us": 60.837,
+            "processor": "GPU",
+            "stage": "overhead"
+          },
+          {
+            "name": "up_proj",
+            "duration_us": 21.27,
+            "start_us": 60.837,
+            "end_us": 82.107,
+            "stage": "overhead",
+            "children": [
+              {
+                "name": "Linear",
+                "duration_us": 21.27,
+                "start_us": 60.837,
+                "end_us": 82.107,
+                "processor": "GPU",
+                "stage": "overhead"
+              }
+            ]
+          },
+          {
+            "name": "down_proj",
+            "duration_us": 21.238,
+            "start_us": 82.107,
+            "end_us": 103.35,
+            "stage": "overhead",
+            "children": [
+              {
+                "name": "Linear",
+                "duration_us": 21.238,
+                "start_us": 82.107,
+                "end_us": 103.35,
+                "processor": "GPU",
+                "stage": "overhead"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "all_reduce",
+        "duration_us": 0.0,
+        "start_us": 103.35,
+        "end_us": 103.35,
+        "stage": "overhead"
+      },
+      {
+        "name": "residual_1",
+        "duration_us": 0.006144,
+        "start_us": 103.35,
+        "end_us": 103.35,
+        "stage": "overhead"
+      }
+    ]
+  }
 }
