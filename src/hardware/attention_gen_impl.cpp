@@ -341,10 +341,13 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
 
   auto config = device->config;
   auto& nb_config = config.nearbank_pim_config;
-  hw_metric compute_peak_flops = config.pim_memory_bandwidth * config.pim_op_b;
-  hw_metric memory_bandwidth = config.pim_memory_bandwidth;
+  hw_metric pim_compute_peak_flops = config.pim_memory_bandwidth * config.pim_op_b;
+  hw_metric pim_memory_bandwidth = config.pim_memory_bandwidth;
+  hw_metric gpu_compute_peak_flops = config.compute_peak_flops;
+  hw_metric gpu_memory_bandwidth = config.memory_bandwidth;
   if(input->precision_byte == 1){
-    compute_peak_flops *= 2;
+    pim_compute_peak_flops *= 2;
+    gpu_compute_peak_flops *= 2;
   }
 
   int head_dim = layer_info.head_dim;
@@ -403,12 +406,17 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
         exec_status.compute_duration += gemv_latency;
         accumul_compute_duration += gemv_latency;
         accumul_memory_duration += gemv_result.rowbuffer_time_ns * attention_group_size;
-      } else {
-        time_ns comp_dur = flops / compute_peak_flops * 1000 * 1000 * 1000;
+      } else if (use_nearbank) {
+        time_ns comp_dur = flops / gpu_compute_peak_flops * 1000 * 1000 * 1000;
         exec_status.compute_duration += comp_dur;
         accumul_compute_duration += comp_dur;
-
-        time_ns mem_dur = memory_size / memory_bandwidth * 1000 * 1000 * 1000;
+        time_ns mem_dur = memory_size / gpu_memory_bandwidth * 1000 * 1000 * 1000;
+        accumul_memory_duration += mem_dur;
+      } else {
+        time_ns comp_dur = flops / pim_compute_peak_flops * 1000 * 1000 * 1000;
+        exec_status.compute_duration += comp_dur;
+        accumul_compute_duration += comp_dur;
+        time_ns mem_dur = memory_size / pim_memory_bandwidth * 1000 * 1000 * 1000;
         accumul_memory_duration += mem_dur;
       }
     }
@@ -441,22 +449,32 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
   }
 
   // =========================================================================
-  // Softmax stage: always on GPU (not modeled by PIM)
+  // Softmax stage
   // =========================================================================
-  // (Softmax computation time is implicit in the original model; we keep it
-  //  as zero when using nearbank since the user's experiments define softmax
-  //  and score@V on GPU for hybrid scenarios)
+  // When enable_softmax_in_pim is false and nearbank is active,
+  // softmax runs on GPU using GPU compute throughput.
+  // When nearbank is off, softmax is included in the PIM opb model.
   if (!use_nearbank || nb_config.enable_softmax_in_pim) {
     for (int seq_idx = 0; seq_idx < num_seq; seq_idx++) {
-      time_ns softmax_dur = 0;
       seq = seq_list.at(seq_idx);
       m = seq->num_process_token;
       n = seq->current_len + seq->num_process_token;
       double softmax_flops = 7.0 * m * n * num_heads;
-      softmax_dur = softmax_flops / compute_peak_flops * 1000 * 1000 * 1000;
       if (!use_nearbank) {
+        time_ns softmax_dur = softmax_flops / pim_compute_peak_flops * 1000 * 1000 * 1000;
         exec_status.total_duration += softmax_dur;
       }
+      // nearbank + softmax_in_pim: softmax is already counted in PIM pipeline
+    }
+  } else if (use_nearbank) {
+    // nearbank on, softmax on GPU
+    for (int seq_idx = 0; seq_idx < num_seq; seq_idx++) {
+      seq = seq_list.at(seq_idx);
+      m = seq->num_process_token;
+      n = seq->current_len + seq->num_process_token;
+      double softmax_flops = 7.0 * m * n * num_heads;
+      time_ns softmax_dur = softmax_flops / gpu_compute_peak_flops * 1000 * 1000 * 1000;
+      exec_status.total_duration += softmax_dur;
     }
   }
 
@@ -488,10 +506,16 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
         time_ns gemv_latency = gemv_result.latency_ns * attention_group_size;
         ctx_compute_duration += gemv_latency;
         ctx_memory_duration += gemv_result.rowbuffer_time_ns * attention_group_size;
-      } else {
-        time_ns comp_dur = flops / compute_peak_flops * 1000 * 1000 * 1000;
+      } else if (use_nearbank) {
+        // nearbank on but context on GPU
+        time_ns comp_dur = flops / gpu_compute_peak_flops * 1000 * 1000 * 1000;
         ctx_compute_duration += comp_dur;
-        time_ns mem_dur = memory_size / memory_bandwidth * 1000 * 1000 * 1000;
+        time_ns mem_dur = memory_size / gpu_memory_bandwidth * 1000 * 1000 * 1000;
+        ctx_memory_duration += mem_dur;
+      } else {
+        time_ns comp_dur = flops / pim_compute_peak_flops * 1000 * 1000 * 1000;
+        ctx_compute_duration += comp_dur;
+        time_ns mem_dur = memory_size / pim_memory_bandwidth * 1000 * 1000 * 1000;
         ctx_memory_duration += mem_dur;
       }
     }
@@ -525,9 +549,9 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
   }
 
   exec_status.compute_util = 1000.0 * 1000.0 * 1000.0 * total_flops /
-                             compute_peak_flops / exec_status.total_duration;
+                             pim_compute_peak_flops / exec_status.total_duration;
   exec_status.memory_util = 1000.0 * 1000.0 * 1000.0 * total_memory_size /
-                            memory_bandwidth / exec_status.total_duration;
+                            pim_memory_bandwidth / exec_status.total_duration;
 
   exec_status.flops = total_flops;
   exec_status.memory_size = total_memory_size;
