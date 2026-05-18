@@ -1,19 +1,19 @@
 {
-  "total_time_us": 5362.6,
-  "first_layer": "MoE_decoder_0",
-  "layer_duration_us": 167.25,
+  "total_time_us": 3307.2,
+  "first_layer": "decoder_0",
+  "layer_duration_us": 103.35,
   "prefill_us": 0,
-  "decode_us": 167.25,
+  "decode_us": 103.35,
   "overhead_us": 0,
   "operations": [
     {
       "indent": 1,
-      "name": "MoE_decoder_0",
-      "duration_us": 167.25,
+      "name": "decoder_0",
+      "duration_us": 103.35,
       "start_us": 0.0,
-      "end_us": 167.25,
+      "end_us": 103.35,
       "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 1.3091mJ  | RD: 25.73mJ  | WR: 0.009466mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.40774mJ  | Total: 27.049mJ | compute util: 0, memory util: 0, Op/B 1.909"
+      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0.78479mJ  | RD: 15.915mJ  | WR: 0.0063867mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.32667mJ  | Total: 16.706mJ | compute util: 0, memory util: 0, Op/B 2.4656"
     },
     {
       "indent": 2,
@@ -126,9 +126,9 @@
     {
       "indent": 2,
       "name": "residual_1",
-      "duration_us": 0.00512,
+      "duration_us": 0.006144,
       "start_us": 39.484,
-      "end_us": 39.489,
+      "end_us": 39.49,
       "processor": null,
       "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
     },
@@ -136,431 +136,98 @@
       "indent": 2,
       "name": "post_attn_layer_norm",
       "duration_us": 0.00512,
-      "start_us": 39.489,
-      "end_us": 39.494,
+      "start_us": 39.49,
+      "end_us": 39.495,
       "processor": null,
       "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
     },
     {
       "indent": 2,
-      "name": "expertFFN",
-      "duration_us": 127.75,
-      "start_us": 39.494,
-      "end_us": 167.25,
+      "name": "feedforward",
+      "duration_us": 63.85,
+      "start_us": 39.495,
+      "end_us": 103.35,
       "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0.97328mJ  | RD: 19.631mJ  | WR: 0.0083255mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.24313mJ  | Total: 20.613mJ | compute util: 0, memory util: 0, Op/B 1.4988"
+      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0.449mJ  | RD: 9.8157mJ  | WR: 0.0052462mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.16207mJ  | Total: 10.27mJ | compute util: 0, memory util: 0, Op/B 1.9978"
     },
     {
       "indent": 3,
-      "name": "sync_0",
-      "duration_us": 0.0,
-      "start_us": 39.494,
-      "end_us": 39.494,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "sync__set",
-      "duration_us": 0.0,
-      "start_us": 39.494,
-      "end_us": 39.494,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "sync__",
-      "duration_us": 0.0,
-      "start_us": 39.494,
-      "end_us": 39.494,
-      "processor": null,
-      "rest": "tensor(1, 1) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 3,
-      "name": "gate_fn",
-      "duration_us": 0.1135,
-      "start_us": 39.494,
-      "end_us": 39.608,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 8) | ACT: 0.0024434mJ  | RD: 0.002281mJ  | WR: 0.00011405mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 3.0147e-05mJ  | Total: 0.0048384mJ | compute util: 0, memory util: 0, Op/B 1.5994"
-    },
-    {
-      "indent": 4,
-      "name": "Linear",
-      "duration_us": 0.1135,
-      "start_us": 39.494,
-      "end_us": 39.608,
-      "processor": "GPU",
-      "rest": "tensor(2, 4096) -> tensor(2, 8) | ACT: 0.0024434mJ  | RD: 0.002281mJ  | WR: 0.00011405mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 3.0147e-05mJ  | Total: 0.0048384mJ | compute util: 0.0006599, memory util: 0.090256, Op/B 1.5994, GPU"
-    },
-    {
-      "indent": 3,
-      "name": "gate_update",
-      "duration_us": 0.0,
-      "start_us": 39.608,
-      "end_us": 39.608,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 3,
-      "name": "moe_scatter",
-      "duration_us": 0.83641,
-      "start_us": 39.608,
-      "end_us": 40.444,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 3,
-      "name": "sync_for_moe_scatter",
-      "duration_us": 0.027307,
-      "start_us": 40.444,
-      "end_us": 40.471,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "sync__set",
-      "duration_us": 0.0,
-      "start_us": 40.444,
-      "end_us": 40.444,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "sync__",
-      "duration_us": 0.027307,
-      "start_us": 40.444,
-      "end_us": 40.471,
-      "processor": null,
-      "rest": "tensor(1, 1) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 3,
-      "name": "moe_route",
-      "duration_us": 0.0,
-      "start_us": 40.471,
-      "end_us": 40.471,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 4096) tensor(2, 4096) tensor(2, 4096) tensor(1, 4096) tensor(1, 4096) tensor(1, 4096) tensor(2, 4096) tensor(6, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 3,
-      "name": "expert_FFN_0",
-      "duration_us": 62.661,
-      "start_us": 40.471,
-      "end_us": 103.13,
-      "processor": null,
-      "rest": "tensor(1, 4096) -> tensor(1, 4096) | ACT: 0.48309mJ  | RD: 9.8131mJ  | WR: 0.0029652mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.081034mJ  | Total: 10.299mJ | compute util: 0, memory util: 0, Op/B 0.99944"
-    },
-    {
-      "indent": 4,
       "name": "gate_proj",
-      "duration_us": 20.863,
-      "start_us": 40.471,
-      "end_us": 61.334,
+      "duration_us": 21.27,
+      "start_us": 39.495,
+      "end_us": 60.766,
       "processor": null,
-      "rest": "tensor(1, 4096) -> tensor(1, 14336) | ACT: 0.16103mJ  | RD: 3.2702mJ  | WR: 0.00091238mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.027011mJ  | Total: 3.4322mJ | compute util: 0, memory util: 0, Op/B 0.99969"
-    },
-    {
-      "indent": 5,
-      "name": "Linear",
-      "duration_us": 20.863,
-      "start_us": 40.471,
-      "end_us": 61.334,
-      "processor": "GPU",
-      "rest": "tensor(1, 4096) -> tensor(1, 14336) | ACT: 0.16103mJ  | RD: 3.2702mJ  | WR: 0.00091238mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.027011mJ  | Total: 3.4322mJ | compute util: 0.0032166, memory util: 0.70386, Op/B 0.99969, GPU"
+      "rest": "tensor(2, 4096) -> tensor(2, 14336) | ACT: 0.15021mJ  | RD: 3.2704mJ  | WR: 0.0015967mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4222mJ | compute util: 0, memory util: 0, Op/B 1.9987"
     },
     {
       "indent": 4,
-      "name": "activation",
-      "duration_us": 0.062,
-      "start_us": 61.334,
-      "end_us": 61.396,
-      "processor": "GPU",
-      "rest": "tensor(1, 14336) -> tensor(1, 14336) | ACT: 0mJ  | RD: 0.0018248mJ  | WR: 0.00091238mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0.0027372mJ | compute util: 0, memory util: 0.17342, Op/B 0, GPU"
-    },
-    {
-      "indent": 4,
-      "name": "up_proj",
-      "duration_us": 20.863,
-      "start_us": 61.396,
-      "end_us": 82.259,
-      "processor": null,
-      "rest": "tensor(1, 4096) -> tensor(1, 14336) | ACT: 0.16103mJ  | RD: 3.2702mJ  | WR: 0.00091238mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.027011mJ  | Total: 3.4322mJ | compute util: 0, memory util: 0, Op/B 0.99969"
-    },
-    {
-      "indent": 5,
       "name": "Linear",
-      "duration_us": 20.863,
-      "start_us": 61.396,
-      "end_us": 82.259,
+      "duration_us": 21.27,
+      "start_us": 39.495,
+      "end_us": 60.766,
       "processor": "GPU",
-      "rest": "tensor(1, 4096) -> tensor(1, 14336) | ACT: 0.16103mJ  | RD: 3.2702mJ  | WR: 0.00091238mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.027011mJ  | Total: 3.4322mJ | compute util: 0.0032166, memory util: 0.70386, Op/B 0.99969, GPU"
-    },
-    {
-      "indent": 4,
-      "name": "down_proj",
-      "duration_us": 20.873,
-      "start_us": 82.259,
-      "end_us": 103.13,
-      "processor": null,
-      "rest": "tensor(1, 14336) -> tensor(1, 4096) | ACT: 0.16103mJ  | RD: 3.2709mJ  | WR: 0.0002281mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.027011mJ  | Total: 3.4322mJ | compute util: 0, memory util: 0, Op/B 0.99969"
-    },
-    {
-      "indent": 5,
-      "name": "Linear",
-      "duration_us": 20.873,
-      "start_us": 82.259,
-      "end_us": 103.13,
-      "processor": "GPU",
-      "rest": "tensor(1, 14336) -> tensor(1, 4096) | ACT: 0.16103mJ  | RD: 3.2709mJ  | WR: 0.0002281mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.027011mJ  | Total: 3.4322mJ | compute util: 0.0032151, memory util: 0.70352, Op/B 0.99969, GPU"
+      "rest": "tensor(2, 4096) -> tensor(2, 14336) | ACT: 0.15021mJ  | RD: 3.2704mJ  | WR: 0.0015967mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4222mJ | compute util: 0.00631, memory util: 0.69059, Op/B 1.9987, GPU"
     },
     {
       "indent": 3,
-      "name": "expert_FFN_1",
-      "duration_us": 62.856,
-      "start_us": 103.13,
-      "end_us": 165.99,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0.48775mJ  | RD: 9.8157mJ  | WR: 0.0052462mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.16207mJ  | Total: 10.309mJ | compute util: 0, memory util: 0, Op/B 1.9978"
-    },
-    {
-      "indent": 4,
-      "name": "gate_proj",
-      "duration_us": 20.939,
-      "start_us": 103.13,
-      "end_us": 124.07,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 14336) | ACT: 0.16313mJ  | RD: 3.2704mJ  | WR: 0.0015967mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4352mJ | compute util: 0, memory util: 0, Op/B 1.9987"
-    },
-    {
-      "indent": 5,
-      "name": "Linear",
-      "duration_us": 20.939,
-      "start_us": 103.13,
-      "end_us": 124.07,
-      "processor": "GPU",
-      "rest": "tensor(2, 4096) -> tensor(2, 14336) | ACT: 0.16313mJ  | RD: 3.2704mJ  | WR: 0.0015967mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4352mJ | compute util: 0.0064099, memory util: 0.70153, Op/B 1.9987, GPU"
-    },
-    {
-      "indent": 4,
       "name": "activation",
       "duration_us": 0.071,
-      "start_us": 124.07,
-      "end_us": 124.14,
+      "start_us": 60.766,
+      "end_us": 60.837,
       "processor": "GPU",
       "rest": "tensor(2, 14336) -> tensor(2, 14336) | ACT: 0mJ  | RD: 0.0031933mJ  | WR: 0.0015967mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0.00479mJ | compute util: 0, memory util: 0.30287, Op/B 0, GPU"
     },
     {
-      "indent": 4,
+      "indent": 3,
       "name": "up_proj",
-      "duration_us": 20.939,
-      "start_us": 124.14,
-      "end_us": 145.08,
+      "duration_us": 21.27,
+      "start_us": 60.837,
+      "end_us": 82.107,
       "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 14336) | ACT: 0.16313mJ  | RD: 3.2704mJ  | WR: 0.0015967mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4352mJ | compute util: 0, memory util: 0, Op/B 1.9987"
-    },
-    {
-      "indent": 5,
-      "name": "Linear",
-      "duration_us": 20.939,
-      "start_us": 124.14,
-      "end_us": 145.08,
-      "processor": "GPU",
-      "rest": "tensor(2, 4096) -> tensor(2, 14336) | ACT: 0.16313mJ  | RD: 3.2704mJ  | WR: 0.0015967mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4352mJ | compute util: 0.0064099, memory util: 0.70153, Op/B 1.9987, GPU"
+      "rest": "tensor(2, 4096) -> tensor(2, 14336) | ACT: 0.15021mJ  | RD: 3.2704mJ  | WR: 0.0015967mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4222mJ | compute util: 0, memory util: 0, Op/B 1.9987"
     },
     {
       "indent": 4,
+      "name": "Linear",
+      "duration_us": 21.27,
+      "start_us": 60.837,
+      "end_us": 82.107,
+      "processor": "GPU",
+      "rest": "tensor(2, 4096) -> tensor(2, 14336) | ACT: 0.15021mJ  | RD: 3.2704mJ  | WR: 0.0015967mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4222mJ | compute util: 0.00631, memory util: 0.69059, Op/B 1.9987, GPU"
+    },
+    {
+      "indent": 3,
       "name": "down_proj",
-      "duration_us": 20.906,
-      "start_us": 145.08,
-      "end_us": 165.99,
+      "duration_us": 21.238,
+      "start_us": 82.107,
+      "end_us": 103.35,
       "processor": null,
-      "rest": "tensor(2, 14336) -> tensor(2, 4096) | ACT: 0.1615mJ  | RD: 3.2716mJ  | WR: 0.00045619mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4335mJ | compute util: 0, memory util: 0, Op/B 1.9987"
+      "rest": "tensor(2, 14336) -> tensor(2, 4096) | ACT: 0.14858mJ  | RD: 3.2716mJ  | WR: 0.00045619mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4206mJ | compute util: 0, memory util: 0, Op/B 1.9987"
     },
     {
-      "indent": 5,
+      "indent": 4,
       "name": "Linear",
-      "duration_us": 20.906,
-      "start_us": 145.08,
-      "end_us": 165.99,
+      "duration_us": 21.238,
+      "start_us": 82.107,
+      "end_us": 103.35,
       "processor": "GPU",
-      "rest": "tensor(2, 14336) -> tensor(2, 4096) | ACT: 0.1615mJ  | RD: 3.2716mJ  | WR: 0.00045619mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4335mJ | compute util: 0.0064199, memory util: 0.70262, Op/B 1.9987, GPU"
-    },
-    {
-      "indent": 3,
-      "name": "sync_2",
-      "duration_us": 0.397,
-      "start_us": 165.99,
-      "end_us": 166.38,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "sync__set",
-      "duration_us": 0.0,
-      "start_us": 165.99,
-      "end_us": 165.99,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "sync__",
-      "duration_us": 0.397,
-      "start_us": 165.99,
-      "end_us": 166.38,
-      "processor": null,
-      "rest": "tensor(1, 1) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 3,
-      "name": "moe_all_reduce_for_e_tp",
-      "duration_us": 0.0,
-      "start_us": 166.38,
-      "end_us": 166.38,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 3,
-      "name": "sync_3",
-      "duration_us": 0.0,
-      "start_us": 166.38,
-      "end_us": 166.38,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "sync__set",
-      "duration_us": 0.0,
-      "start_us": 166.38,
-      "end_us": 166.38,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "sync__",
-      "duration_us": 0.0,
-      "start_us": 166.38,
-      "end_us": 166.38,
-      "processor": null,
-      "rest": "tensor(1, 1) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 3,
-      "name": "moe_gather",
-      "duration_us": 0.83641,
-      "start_us": 166.38,
-      "end_us": 167.22,
-      "processor": null,
-      "rest": "tensor(1, 4096) tensor(2, 4096) -> tensor(1, 4096) tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 3,
-      "name": "sync_for_moe_gather",
-      "duration_us": 0.027307,
-      "start_us": 167.22,
-      "end_us": 167.25,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "sync__set",
-      "duration_us": 0.0,
-      "start_us": 167.22,
-      "end_us": 167.22,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "sync__",
-      "duration_us": 0.027307,
-      "start_us": 167.22,
-      "end_us": 167.25,
-      "processor": null,
-      "rest": "tensor(1, 1) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 3,
-      "name": "moe_all_reduce_for_gather",
-      "duration_us": 0.0,
-      "start_us": 167.25,
-      "end_us": 167.25,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 3,
-      "name": "sync_5",
-      "duration_us": 0.0,
-      "start_us": 167.25,
-      "end_us": 167.25,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "sync__set",
-      "duration_us": 0.0,
-      "start_us": 167.25,
-      "end_us": 167.25,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "sync__",
-      "duration_us": 0.0,
-      "start_us": 167.25,
-      "end_us": 167.25,
-      "processor": null,
-      "rest": "tensor(1, 1) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 3,
-      "name": "sync_6",
-      "duration_us": 0.0,
-      "start_us": 167.25,
-      "end_us": 167.25,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "sync__set",
-      "duration_us": 0.0,
-      "start_us": 167.25,
-      "end_us": 167.25,
-      "processor": null,
-      "rest": "tensor(2, 4096) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
-    },
-    {
-      "indent": 4,
-      "name": "sync__",
-      "duration_us": 0.0,
-      "start_us": 167.25,
-      "end_us": 167.25,
-      "processor": null,
-      "rest": "tensor(1, 1) -> tensor(1, 1) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
+      "rest": "tensor(2, 14336) -> tensor(2, 4096) | ACT: 0.14858mJ  | RD: 3.2716mJ  | WR: 0.00045619mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0.054023mJ  | Total: 3.4206mJ | compute util: 0.0063197, memory util: 0.69165, Op/B 1.9987, GPU"
     },
     {
       "indent": 2,
-      "name": "residual_2",
-      "duration_us": 0.00512,
-      "start_us": 167.25,
-      "end_us": 167.25,
+      "name": "all_reduce",
+      "duration_us": 0.0,
+      "start_us": 103.35,
+      "end_us": 103.35,
+      "processor": null,
+      "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
+    },
+    {
+      "indent": 2,
+      "name": "residual_1",
+      "duration_us": 0.006144,
+      "start_us": 103.35,
+      "end_us": 103.35,
       "processor": null,
       "rest": "tensor(2, 4096) -> tensor(2, 4096) | ACT: 0mJ  | RD: 0mJ  | WR: 0mJ  | all_ACT: 0mJ  | all_RD: 0mJ  | all_WR: 0mJ  | MAC: 0mJ  | Total: 0mJ | compute util: 0, memory util: 0, Op/B 0"
     }

@@ -4,7 +4,7 @@
 # Smaller data footprint → faster row buffer fills
 
 model:
-  model_name: mixtral
+  model_name: llama3_8B
 
 system:
   gpu_gen: B100

@@ -3,7 +3,7 @@
 # Data type: 2-bit quantized (0.25 bytes per element)
 
 model:
-  model_name: mixtral
+  model_name: llama3_8B
 
 system:
   gpu_gen: B100

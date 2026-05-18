@@ -166,6 +166,8 @@ int main(int argc, char *argv[]) {
     model_config = openMoE;
   } else if (!model_name.compare("llama7bMoE")) {
     model_config = llama7bMoE;
+  } else if (!model_name.compare("llama3_8B")) {
+    model_config = llama3_8B;
   } else if (!model_name.compare("llama3_405B")) {
     model_config = llama3_405B;
   } else if (!model_name.compare("grok1")) {
