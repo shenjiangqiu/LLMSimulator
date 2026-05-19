@@ -72,6 +72,15 @@ struct NearbankPIMConfig {
     // Zero point for K matrix (dequant: k = s_K * (k̂ - z_K))
     hw_metric zero_point_k = 0.0;
 
+    // --- PIM Dequantization ---
+    // When enabled, 2-bit KV data is first dequantized to FP16 inside PIM
+    // before computing the GEMV.  Model:
+    //   1. Read 2-bit data into rowbuffer (small, fast)
+    //   2. PE dequantizes: 1 MUL + 1 ADD per element → FP16
+    //   3. PE computes FP16 GEMV on dequantized data
+    // Cost: dequant ops + FP16 GEMV ops, all in PE (no extra DRAM reads)
+    bool enable_pim_dequant = false;
+
     // --- Derived Values (computed after config is set) ---
     // PE throughput in bytes/second = pe_width_bytes / pe_cycle_time_ns * 1e9
     hw_metric getPEThroughput() const {

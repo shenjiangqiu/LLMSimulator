@@ -151,6 +151,32 @@ NearbankGEMVResult NearbankPIMUnit::computeGEMVLatency(
         result.latency_ns = result.base_gemv_time_ns;
     }
 
+    // --- Step 6b: PIM dequantization overhead ---
+    // When enabled, 2-bit KV data is dequantized to FP16 inside PIM
+    // before GEMV.  Per element: 1 MUL (scale×int2) + 1 ADD (offset).
+    // Done inline with GEMV on the same data stream — PE time only.
+    if (config_.enable_pim_dequant) {
+        double dequant_elements = static_cast<double>(K) * N;  // K or V matrix
+        double dequant_ops = 2.0 * dequant_elements;  // 1 MUL + 1 ADD per element
+        double dequant_per_bank = dequant_ops / num_banks;
+        double dequant_pe_time = dequant_per_bank / pe_width * pe_cycle;
+
+        double total_pe_all = result.pe_compute_time_ns
+                            + result.reduction_time_ns + dequant_pe_time;
+
+        if (result.bytes_per_bank <= rb_size) {
+            double fill_time = result.bytes_per_bank / dram_bw * 1e9;
+            result.latency_ns = std::max(fill_time, total_pe_all);
+        } else {
+            double first_fill = time_per_rb_fill;
+            double remaining_fill =
+                (result.num_rowbuffer_fills - 1) * time_per_rb_fill;
+            result.latency_ns =
+                first_fill + std::max(remaining_fill, total_pe_all);
+        }
+        result.pe_compute_time_ns += dequant_pe_time;
+    }
+
     // --- Step 7: Build description ---
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(2);

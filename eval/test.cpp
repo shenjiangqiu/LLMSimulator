@@ -236,6 +236,8 @@ int main(int argc, char *argv[]) {
       nb.zero_point_q = config["nearbank_pim"]["zero_point_q"].as<double>();
     if (config["nearbank_pim"]["zero_point_k"])
       nb.zero_point_k = config["nearbank_pim"]["zero_point_k"].as<double>();
+    if (config["nearbank_pim"]["enable_pim_dequant"])
+      nb.enable_pim_dequant = config["nearbank_pim"]["enable_pim_dequant"].as<bool>();
   }
 
   model_config.dataset = data_name;
