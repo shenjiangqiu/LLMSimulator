@@ -309,6 +309,9 @@ void TopModuleGraph::set_pop_status() {
   status.score_v_duration += exec_status.score_v_duration;
   status.kv_quant_duration += exec_status.kv_quant_duration;
 
+  status.pim_rb_duration += exec_status.pim_rb_duration;
+  status.pim_pe_duration += exec_status.pim_pe_duration;
+
   status.opb = exec_status.opb;
 }
 

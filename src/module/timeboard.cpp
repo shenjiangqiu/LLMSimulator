@@ -73,6 +73,8 @@ void TimeStamp::set_status(const StatusBoard& output_status) {
   status.softmax_duration = output_status.softmax_duration - status.softmax_duration;
   status.score_v_duration = output_status.score_v_duration - status.score_v_duration;
   status.kv_quant_duration = output_status.kv_quant_duration - status.kv_quant_duration;
+  status.pim_rb_duration = output_status.pim_rb_duration - status.pim_rb_duration;
+  status.pim_pe_duration = output_status.pim_pe_duration - status.pim_pe_duration;
 
   if (status.memory_size != 0) {
     status.opb = status.flops / status.memory_size;
@@ -257,6 +259,10 @@ void TimeStamp::print_util() {
               << "us softmax=" << status.softmax_duration / 1000.0
               << "us score_v=" << status.score_v_duration / 1000.0
               << "us kv_quant=" << status.kv_quant_duration / 1000.0 << "us";
+  }
+  if (status.pim_rb_duration > 0 || status.pim_pe_duration > 0) {
+    std::cout << " | pim_rb=" << status.pim_rb_duration / 1000.0
+              << "us pim_pe=" << status.pim_pe_duration / 1000.0 << "us";
   }
 }
 
