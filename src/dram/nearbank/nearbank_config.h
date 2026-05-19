@@ -17,7 +17,7 @@ namespace llm_system {
 struct NearbankPIMConfig {
     // --- Bank Configuration ---
     // Total number of PIM-enabled banks across all cubes
-    int num_pim_banks = 256;
+    int num_pim_banks = 2048;
 
     // Number of PIM cubes (stacked DRAM dies with PIM capability)
     int num_pim_cubes = 8;

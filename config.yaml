@@ -62,7 +62,7 @@ nearbank_pim:
   enable_nearbank_model: true
   
   # Number of PIM-enabled banks
-  num_pim_banks: 256
+  num_pim_banks: 2048
   
   # Number of PIM cubes (HBM stacks)
   num_pim_cubes: 8

@@ -49,7 +49,7 @@ log:
 
 nearbank_pim:
   enable_nearbank_model: true
-  num_pim_banks: 256
+  num_pim_banks: 2048
   rowbuffer_size_bytes: 2048
   pe_width_bytes: 16.0
   pe_cycle_time_ns: 0.5

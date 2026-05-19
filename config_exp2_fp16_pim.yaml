@@ -54,7 +54,7 @@ log:
 
 nearbank_pim:
   enable_nearbank_model: true
-  num_pim_banks: 256
+  num_pim_banks: 2048
   num_pim_cubes: 8
   channels_per_cube: 32
   rowbuffer_size_bytes: 2048
