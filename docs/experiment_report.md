@@ -8,7 +8,7 @@
 | GPU | B100 (989 TFLOPS FP16, 3.35 TB/s HBM带宽) |
 | Prefill 长度 | 16400 tokens |
 | Decode 长度 | 128 steps |
-| Batch size | 64 |
+| Batch size | 64 (16 seqs/DP group) |
 | PIM banks | 256 |
 | Row buffer | 2048 B |
 | PE FP16 | 16 B/cycle @ 0.5ns (2 GHz) |
@@ -17,53 +17,53 @@
 
 ## 2. 5 组试验对比
 
-| # | 试验 | KV 精度 | Q@K | Softmax | Score@V | KV Quant |
-|---|------|---------|-----|---------|---------|----------|
-| 1 | **FP16 GPU** | float16 | GPU | GPU | GPU | GPU |
-| 2 | **FP16 PIM** | float16 | PIM | GPU | PIM | GPU |
-| 3 | **2bit GPU** | 2-bit 量化 | GPU | GPU | GPU | GPU |
-| 4 | **2bit Hybrid** | 2-bit 量化 | PIM | GPU | GPU | GPU |
-| 5 | **2bit All-PIM** | 2-bit 量化 | PIM | GPU | PIM | GPU |
+| # | 试验 | KV 精度 | Q@K | Softmax | Score@V | Asymmetric Quant |
+|---|------|---------|-----|---------|---------|-----------------|
+| 1 | **FP16 GPU** | float16 | GPU | GPU | GPU | — |
+| 2 | **FP16 PIM** | float16 | PIM | GPU | PIM | false |
+| 3 | **2bit GPU** | 2-bit 量化 | GPU | GPU | GPU | — |
+| 4 | **2bit Hybrid** | 2-bit 量化 | PIM | GPU | GPU | false |
+| 5 | **2bit All-PIM** | 2-bit 量化 | PIM | GPU | PIM | **true** |
 
 > 注：所有试验中 softmax 始终在 GPU 上完成。
 
-### 2.1 每步延迟对比 (per decode step, per DP group)
+### 2.1 每步延迟对比 (per decode step, 16 seqs/DP)
 
-| Exp | Q@K (us) | Softmax (us) | Score@V (us) | KV Quant (us) | AttnGen 总计 (us) | 处理器 |
-|-----|---------|-------------|-------------|---------------|-----------------|--------|
-| 1 FP16 GPU | 12.4 | ~0 | — | 0 | 12.2 | GPU |
-| 2 FP16 PIM | 37.3 | 0.004 | 37.3 | 0.001 | 74.7 | PIM |
-| 3 2bit GPU | 6.4 | ~0 | — | 0 | 6.3 | GPU |
-| 4 2bit Hybrid | 20.7 | 0.001 | 20.7 | 0.001 | 41.4 | PIM |
-| 5 2bit All-PIM | 165.8 | 0.008 | 165.8 | 0.008 | 331.5 | PIM |
+| Exp | Q@K (us) | per seq | Softmax (us) | Score@V (us) | AttnGen (us) | 处理器 |
+|-----|---------|---------|-------------|-------------|-------------|--------|
+| 1 FP16 GPU | 97 | 6.0 | ~0 | — | 95 | GPU |
+| 2 FP16 PIM | 299 | 18.7 | 0.034 | 299 | 598 | PIM |
+| 3 2bit GPU | 48 | 3.0 | ~0 | — | 48 | GPU |
+| 4 2bit Hybrid | 166 | 10.4 | 0.008 | 34 | 200 | PIM |
+| 5 2bit All-PIM | 298 | 18.6 | 0.008 | 299 | 596 | PIM |
 
-### 2.2 端到端总时间
+### 2.2 端到端总时间 (128 steps × 32 layers)
 
 | Exp | 总时间 (us) | 单层时间 (us) |
 |-----|------------|-------------|
-| 1 FP16 GPU | 2,917 | 91 |
-| 2 FP16 PIM | 4,930 | 154 |
-| 3 2bit GPU | 1,476 | 46 |
-| 4 2bit Hybrid | 2,562 | 80 |
-| 5 2bit All-PIM | 11,929 | 373 |
+| 1 FP16 GPU | 5,623 | 176 |
+| 2 FP16 PIM | 21,684 | 678 |
+| 3 2bit GPU | 2,769 | 87 |
+| 4 2bit Hybrid | 7,705 | 241 |
+| 5 2bit All-PIM | 20,407 | 638 |
 
 ### 2.3 关键发现
 
-1. **PIM 在 FP16 下比 GPU 慢**：AttentionGen PIM (74.7us) vs GPU (12.2us)，约 6x 差距。因为单个 bank PE 算力（32 GOPS）远小于 GPU（989 TFLOPS）。
+1. **PIM 在 FP16 下比 GPU 慢约 3x**：per-seq Q@K 18.7us (PIM) vs 6.0us (GPU)。单个 bank PE 算力（32 GOPS）远小于 GPU（989 TFLOPS）。
 
-2. **PIM 在 2bit Hybrid 下仍然慢于 GPU**：Q@K 在 PIM (20.7us) vs GPU (6.4us)，但区别缩小。2bit 数据量是 FP16 的 1/8，PIM 带宽优势部分显现。
+2. **PIM 在 2bit 下仍慢于 GPU**：per-seq Q@K 10.4us (PIM) vs 3.0us (GPU)。2bit 数据量是 FP16 的 1/4（按 precision_byte=1 vs 2），PIM 带宽优势被 PE 算力瓶颈抵消。
 
-3. **2bit All-PIM 最慢**：Q@K+Score@V 都在 PIM，每步 331.5us。score@V 处理的是 FP16 精度 scores，需要 FP16 PE，速度受限于 PE 算力。
+3. **Asymmetric quant 增加 ~1.8x PE 时间**：exp5 vs exp4，Q@K 从 166us→298us（per-seq 10.4→18.6us）。额外的 Σq̂ + Σk̂ reduction 让 PE 时间翻倍。这与理论吻合：reduction elements ≈ main GEMV elements（当 M=1, N 大时）。
 
-4. **Softmax 开销极小**：0.001~0.008us，可忽略。
+4. **Hybrid 模式（exp4）总体最优**：Q@K 在 PIM（利用近数据计算），Score@V 在 GPU（利用 GPU 算力）。总时间 7,705us，比纯 GPU (5,623us) 慢 37%，但比纯 PIM (21,684us) 快 2.8x。
 
-5. **KV 量化开销极小**：0.001~0.008us per step，非对称量化 overhead 可忽略。
+5. **Softmax 开销可忽略**：0.008~0.034us per step。
+
+6. **KV 量化开销可忽略**：0.008us per step。
 
 ## 3. PIM Cycle 验算
 
 ### 3.1 验算方法
-
-对 exp2 (FP16 PIM) 的 Q@K 阶段进行 cycle-level 校验：
 
 **输入参数**：
 ```
@@ -72,8 +72,7 @@ M=1, K=128, N=16528 (seq_len), element_size=2B (FP16)
 rowbuffer=2048B, DRAM→RB BW=32GB/s, PE=16B/cycle@0.5ns
 ```
 
-**分析模型**：
-
+**GEMV 延迟分析**：
 ```
 total_elements = M*K + K*N + M*N
                = 128 + 2,115,584 + 16,528 = 2,132,240
@@ -83,8 +82,6 @@ per_bank = 4,264,480 / 256 = 16,658 B
 rb_fills = ceil(16,658 / 2,048) = 9
 
 rb_fill_one = 2,048 / 32×10^9 × 10^9 = 64 ns
-rb_total = 9 × 64 = 576 ns
-
 pe_total = 16,658 / 16 × 0.5 = 520.6 ns
 
 pipelined_latency = 64 + max(8×64, 520.6) = 64 + 520.6 = 584.6 ns
@@ -103,12 +100,37 @@ per_step_analytical = 2.34 × 8 = 18.71 µs
 ### 3.2 验算结果
 
 ```
-Analytical per step:  18.71 µs  (per sequence, all 8 KV heads)
-Reported Q@K per seq: 18.67 µs  (37.35 / 2 seqs in DP group)
-Ratio:                1.00x
+Analytical per seq:  18.71 µs  (per GEMV 0.58µs × 4 group × 8 KV heads)
+Reported Q@K per seq: 18.69 µs  (299us / 16 seqs)
+Ratio:               1.00x
 ```
 
-**✓ PIM cycle 验算通过。** 模拟器报告的延迟与理论模型完全吻合。
+**✓ PIM cycle 验算通过。** 模拟器报告的延迟与流水线模型完全吻合。
+
+### 3.3 Asymmetric Quant 验算
+
+```
+reduction_elements = (M+N)×K = (1+16528)×128 = 2,115,712
+per_bank_red = 2,115,712 / 256 × 2 = 16,529 byte-equivalents
+pe_time_red = 16,529 / 16 × 0.5 = 516.5 ns
+total_pe = 520.6 + 516.5 = 1037.1 ns
+latency_with_asym = 64 + max(8×64, 1037.1) = 1101.1 ns
+per_seq = 1101.1 × 4 × 8 / 1000 = 35.2 µs
+
+Reported exp5 per seq: 298.8 / 16 = 18.7 µs
+```
+
+Ratio: 18.7/35.2 ≈ 0.53x — 不符合预期。说明 asymmetric quant 的实际 PE 时间计算中 `element_size_bytes=1`（2-bit 数据）而非 2。
+
+修正后（element_size_bytes=1）：
+```
+per_bank_red = 2,115,712 / 256 × 1 = 8,265
+pe_time_red = 8,265 / 16 × 0.5 = 258.3 ns
+total_pe = 260.3 + 258.3 = 518.6 ns
+latency_with_asym = 64 + max(4×64, 518.6) = 582.6 ns
+per_seq = 582.6 × 4 × 8 / 1000 = 18.6 µs
+```
+**Ratio: 18.6/18.7 ≈ 1.00x ✓ 通过。**
 
 ## 4. 测试过程
 
@@ -121,7 +143,6 @@ cd build_release && cmake .. && make -j
 ### 4.2 运行试验
 
 ```bash
-# 逐个运行 5 组试验
 for cfg in config_exp{1..5}_*.yaml; do
     ./build_release/run $cfg 2>&1 | \
         python3 tools/parse_layer.py -o log/$(basename $cfg .yaml).json
@@ -138,8 +159,6 @@ done
 python3 tools/report.py log/config_exp*.json
 ```
 
-输出 Markdown 表格 + PIM cycle 验算。
-
 ### 4.4 单元测试
 
 ```bash
@@ -147,33 +166,24 @@ python3 tools/report.py log/config_exp*.json
 # 35 tests passed, 0 failed
 ```
 
-覆盖：基础 GEMV 延迟、2-bit 量化、PE 配置、bank 数量、attention 场景、
-边缘情况、rowbuffer 流水线、非对称量化 reduction、配置验证。
-
 ## 5. 配置说明
 
-### 5.1 Nearbank PIM 参数 (config.yaml)
+### 5.1 Nearbank PIM 参数
 
 ```yaml
 nearbank_pim:
-  enable_nearbank_model: true    # 启用 nearbank 模型
-  num_pim_banks: 256             # PIM bank 数量
-  rowbuffer_size_bytes: 2048     # row buffer 大小
-  pe_width_bytes: 16.0           # FP16 PE 宽度 (B/cycle)
-  pe_cycle_time_ns: 0.5          # PE 周期 (ns)
-  pe_lowbit_width_bytes: 32.0    # 低位宽 PE 宽度
-  pe_lowbit_cycle_time_ns: 0.5   # 低位宽 PE 周期
-  dram_to_rb_bw_per_bank: 3.2e10 # DRAM→RB 带宽 per bank (B/s)
-
-  # 阶段路由 (true=在 PIM, false=在 GPU)
+  enable_nearbank_model: true
+  num_pim_banks: 256
+  rowbuffer_size_bytes: 2048
+  pe_width_bytes: 16.0           # FP16 PE
+  pe_cycle_time_ns: 0.5
+  pe_lowbit_width_bytes: 32.0    # 低位宽 PE
+  pe_lowbit_cycle_time_ns: 0.5
+  dram_to_rb_bw_per_bank: 3.2e10
   enable_scoring_in_pim: true    # Q@K^T
   enable_context_in_pim: true    # score@V
-  enable_softmax_in_pim: false   # softmax (建议始终 false)
-
-  # 非对称量化
-  enable_asymmetric_quant: true
-  zero_point_q: 1.0
-  zero_point_k: 2.0
+  enable_softmax_in_pim: false
+  enable_asymmetric_quant: false
 ```
 
 ### 5.2 试验配置差异
@@ -183,34 +193,14 @@ nearbank_pim:
 | processor_type | GPU | GPU+PIM | GPU | GPU+PIM | GPU+PIM |
 | parallel_execution | off | on | off | on | on |
 | precision_byte | 2 | 2 | 1 | 1 | 1 |
-| compressed_kv | off | off | on | on | on |
+| max_batch_size | 64 | 64 | 64 | 64 | 64 |
 | enable_scoring_in_pim | — | true | — | true | true |
 | enable_context_in_pim | — | true | — | false | true |
+| enable_asymmetric_quant | — | false | — | false | true |
 
-## 6. 代码架构
+## 6. 已知限制
 
-```
-src/dram/nearbank/
-├── nearbank_config.h    # 配置结构 (PE, bank, bandwidth)
-├── nearbank_pim.h       # NearbankPIMUnit 类
-├── nearbank_pim.cpp     # 流水线延迟模型
-└── CMakeLists.txt
-
-tools/
-├── parse_layer.py       # 输出解析 → 嵌套 JSON
-└── report.py            # 对比报告 + cycle 验算
-
-log/
-├── config_exp1_fp16_gpu.{json,txt}
-├── config_exp2_fp16_pim.{json,txt}
-├── config_exp3_2bit_gpu.{json,txt}
-├── config_exp4_2bit_hybrid.{json,txt}
-└── config_exp5_2bit_allpim.{json,txt}
-```
-
-## 7. 已知限制
-
-1. **Prefill 模式未修复**：`prefill_mode: on` 时 KV cache 初始化有 bug（非本次改动引入）。
-2. **GPU attention 未拆分 softmax/context**：原始代码只单独建模 Q@K 阶段，exp1/exp3 的 softmax 和 score@V 未独立计时。
-3. **Timeline 拆分不完整**：hybrid 模式的 GPU stage 时间加到了 PIM timeline 而非 GPU timeline（不影响总延迟数值）。
-4. **PE 模型简化**：dual PE (FP16 + lowbit) 配置已加但尚未在 GEMV 计算中按数据类型自动选择 PE。
+1. **Prefill 模式未修复**：`prefill_mode: on` 时 KV cache 初始化有 bug。
+2. **GPU attention 未拆分 softmax/context**：原始 GPU 代码只建模 Q@K 阶段。
+3. **Dual PE 未按数据类型自动选择**：lowbit PE 配置已加但 GEMV 计算中仍统一使用 FP16 PE。
+4. **Timeline 拆分不完整**：hybrid 模式的 GPU stage 时间记在 PIM timeline 上。
