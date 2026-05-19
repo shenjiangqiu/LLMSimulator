@@ -1,42 +1,42 @@
 {
-  "total_time_us": 2561.6,
+  "total_time_us": 7705.0,
   "first_layer": "decoder_0",
-  "layer_duration_us": 80.051,
+  "layer_duration_us": 240.78,
   "prefill_us": 0,
-  "decode_us": 80.051,
+  "decode_us": 240.78,
   "operations": {
     "name": "decoder_0",
-    "duration_us": 80.051,
+    "duration_us": 240.78,
     "start_us": 0.0,
-    "end_us": 80.051,
+    "end_us": 240.78,
     "stage": "decode",
     "children": [
       {
         "name": "input_layer_norm",
-        "duration_us": 0.00256,
+        "duration_us": 0.016896,
         "start_us": 0.0,
-        "end_us": 0.00256,
+        "end_us": 0.016896,
         "stage": "overhead"
       },
       {
         "name": "attention",
-        "duration_us": 48.139,
-        "start_us": 0.00256,
-        "end_us": 48.141,
+        "duration_us": 207.91,
+        "start_us": 0.016896,
+        "end_us": 207.92,
         "stage": "decode",
         "children": [
           {
             "name": "attn_qkv_proj",
-            "duration_us": 3.861,
-            "start_us": 0.00256,
-            "end_us": 3.8636,
+            "duration_us": 4.5915,
+            "start_us": 0.016896,
+            "end_us": 4.6084,
             "stage": "overhead",
             "children": [
               {
                 "name": "Linear",
-                "duration_us": 3.861,
-                "start_us": 0.00256,
-                "end_us": 3.8636,
+                "duration_us": 4.5915,
+                "start_us": 0.016896,
+                "end_us": 4.6084,
                 "processor": "GPU",
                 "stage": "overhead"
               }
@@ -44,55 +44,55 @@
           },
           {
             "name": "self_attention",
-            "duration_us": 41.443,
-            "start_us": 3.8636,
-            "end_us": 45.306,
+            "duration_us": 199.56,
+            "start_us": 4.6084,
+            "end_us": 204.17,
             "stage": "decode",
             "children": [
               {
                 "name": "AttentionSplit",
                 "duration_us": 0.0,
-                "start_us": 3.8636,
-                "end_us": 3.8636,
+                "start_us": 4.6084,
+                "end_us": 4.6084,
                 "stage": "overhead"
               },
               {
                 "name": "AttentionSum",
                 "duration_us": 0.0,
-                "start_us": 3.8636,
-                "end_us": 3.8636,
+                "start_us": 4.6084,
+                "end_us": 4.6084,
                 "processor": "GPU",
                 "stage": "prefill"
               },
               {
                 "name": "AttentionGen",
-                "duration_us": 41.443,
-                "start_us": 3.8636,
-                "end_us": 45.306,
+                "duration_us": 199.56,
+                "start_us": 4.6084,
+                "end_us": 204.17,
                 "processor": "PIM",
                 "stage": "decode"
               },
               {
                 "name": "AttentionMerge",
                 "duration_us": 0.0,
-                "start_us": 45.306,
-                "end_us": 45.306,
+                "start_us": 204.17,
+                "end_us": 204.17,
                 "stage": "overhead"
               }
             ]
           },
           {
             "name": "attn_o_proj",
-            "duration_us": 2.835,
-            "start_us": 45.306,
-            "end_us": 48.141,
+            "duration_us": 3.7565,
+            "start_us": 204.17,
+            "end_us": 207.92,
             "stage": "overhead",
             "children": [
               {
                 "name": "Linear",
-                "duration_us": 2.835,
-                "start_us": 45.306,
-                "end_us": 48.141,
+                "duration_us": 3.7565,
+                "start_us": 204.17,
+                "end_us": 207.92,
                 "processor": "GPU",
                 "stage": "overhead"
               }
@@ -101,45 +101,45 @@
           {
             "name": "all_reduce",
             "duration_us": 0.0,
-            "start_us": 48.141,
-            "end_us": 48.141,
+            "start_us": 207.92,
+            "end_us": 207.92,
             "stage": "overhead"
           }
         ]
       },
       {
         "name": "residual_1",
-        "duration_us": 0.003072,
-        "start_us": 48.141,
-        "end_us": 48.144,
+        "duration_us": 0.024576,
+        "start_us": 207.92,
+        "end_us": 207.95,
         "stage": "overhead"
       },
       {
         "name": "post_attn_layer_norm",
-        "duration_us": 0.00256,
-        "start_us": 48.144,
-        "end_us": 48.147,
+        "duration_us": 0.016896,
+        "start_us": 207.95,
+        "end_us": 207.96,
         "stage": "overhead"
       },
       {
         "name": "feedforward",
-        "duration_us": 31.901,
-        "start_us": 48.147,
-        "end_us": 80.048,
+        "duration_us": 32.794,
+        "start_us": 207.96,
+        "end_us": 240.76,
         "stage": "overhead",
         "children": [
           {
             "name": "gate_proj",
-            "duration_us": 10.615,
-            "start_us": 48.147,
-            "end_us": 58.762,
+            "duration_us": 10.941,
+            "start_us": 207.96,
+            "end_us": 218.9,
             "stage": "overhead",
             "children": [
               {
                 "name": "Linear",
-                "duration_us": 10.615,
-                "start_us": 48.147,
-                "end_us": 58.762,
+                "duration_us": 10.941,
+                "start_us": 207.96,
+                "end_us": 218.9,
                 "processor": "GPU",
                 "stage": "overhead"
               }
@@ -147,24 +147,24 @@
           },
           {
             "name": "activation",
-            "duration_us": 0.062,
-            "start_us": 58.762,
-            "end_us": 58.824,
+            "duration_us": 0.134,
+            "start_us": 218.9,
+            "end_us": 219.04,
             "processor": "GPU",
             "stage": "overhead"
           },
           {
             "name": "up_proj",
-            "duration_us": 10.616,
-            "start_us": 58.824,
-            "end_us": 69.44,
+            "duration_us": 10.941,
+            "start_us": 219.04,
+            "end_us": 229.98,
             "stage": "overhead",
             "children": [
               {
                 "name": "Linear",
-                "duration_us": 10.616,
-                "start_us": 58.824,
-                "end_us": 69.44,
+                "duration_us": 10.941,
+                "start_us": 219.04,
+                "end_us": 229.98,
                 "processor": "GPU",
                 "stage": "overhead"
               }
@@ -172,16 +172,16 @@
           },
           {
             "name": "down_proj",
-            "duration_us": 10.608,
-            "start_us": 69.44,
-            "end_us": 80.048,
+            "duration_us": 10.778,
+            "start_us": 229.98,
+            "end_us": 240.76,
             "stage": "overhead",
             "children": [
               {
                 "name": "Linear",
-                "duration_us": 10.608,
-                "start_us": 69.44,
-                "end_us": 80.048,
+                "duration_us": 10.778,
+                "start_us": 229.98,
+                "end_us": 240.76,
                 "processor": "GPU",
                 "stage": "overhead"
               }
@@ -192,15 +192,15 @@
       {
         "name": "all_reduce",
         "duration_us": 0.0,
-        "start_us": 80.048,
-        "end_us": 80.048,
+        "start_us": 240.76,
+        "end_us": 240.76,
         "stage": "overhead"
       },
       {
         "name": "residual_1",
-        "duration_us": 0.003072,
-        "start_us": 80.048,
-        "end_us": 80.051,
+        "duration_us": 0.024576,
+        "start_us": 240.76,
+        "end_us": 240.78,
         "stage": "overhead"
       }
     ]

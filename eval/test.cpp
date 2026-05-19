@@ -203,6 +203,41 @@ int main(int argc, char *argv[]) {
   system_config.exit_out_of_memory = config["simulation"]["exit_out_of_memory"].as<bool>();
   system_config.mem_cap_limit = config["simulation"]["mem_cap_limit"].as<bool>();
 
+  // Parse nearbank_pim config section
+  if (config["nearbank_pim"]) {
+    auto& nb = system_config.nearbank_pim_config;
+    if (config["nearbank_pim"]["enable_nearbank_model"])
+      nb.enable_nearbank_model = config["nearbank_pim"]["enable_nearbank_model"].as<bool>();
+    if (config["nearbank_pim"]["num_pim_banks"])
+      nb.num_pim_banks = config["nearbank_pim"]["num_pim_banks"].as<int>();
+    if (config["nearbank_pim"]["num_pim_cubes"])
+      nb.num_pim_cubes = config["nearbank_pim"]["num_pim_cubes"].as<int>();
+    if (config["nearbank_pim"]["rowbuffer_size_bytes"])
+      nb.rowbuffer_size_bytes = config["nearbank_pim"]["rowbuffer_size_bytes"].as<double>();
+    if (config["nearbank_pim"]["pe_width_bytes"])
+      nb.pe_width_bytes = config["nearbank_pim"]["pe_width_bytes"].as<double>();
+    if (config["nearbank_pim"]["pe_cycle_time_ns"])
+      nb.pe_cycle_time_ns = config["nearbank_pim"]["pe_cycle_time_ns"].as<double>();
+    if (config["nearbank_pim"]["pe_lowbit_width_bytes"])
+      nb.pe_lowbit_width_bytes = config["nearbank_pim"]["pe_lowbit_width_bytes"].as<double>();
+    if (config["nearbank_pim"]["pe_lowbit_cycle_time_ns"])
+      nb.pe_lowbit_cycle_time_ns = config["nearbank_pim"]["pe_lowbit_cycle_time_ns"].as<double>();
+    if (config["nearbank_pim"]["dram_to_rb_bw_per_bank"])
+      nb.dram_to_rb_bw_per_bank = config["nearbank_pim"]["dram_to_rb_bw_per_bank"].as<double>();
+    if (config["nearbank_pim"]["enable_softmax_in_pim"])
+      nb.enable_softmax_in_pim = config["nearbank_pim"]["enable_softmax_in_pim"].as<bool>();
+    if (config["nearbank_pim"]["enable_context_in_pim"])
+      nb.enable_context_in_pim = config["nearbank_pim"]["enable_context_in_pim"].as<bool>();
+    if (config["nearbank_pim"]["enable_scoring_in_pim"])
+      nb.enable_scoring_in_pim = config["nearbank_pim"]["enable_scoring_in_pim"].as<bool>();
+    if (config["nearbank_pim"]["enable_asymmetric_quant"])
+      nb.enable_asymmetric_quant = config["nearbank_pim"]["enable_asymmetric_quant"].as<bool>();
+    if (config["nearbank_pim"]["zero_point_q"])
+      nb.zero_point_q = config["nearbank_pim"]["zero_point_q"].as<double>();
+    if (config["nearbank_pim"]["zero_point_k"])
+      nb.zero_point_k = config["nearbank_pim"]["zero_point_k"].as<double>();
+  }
+
   model_config.dataset = data_name;
 
   if (!data_name.compare("synthesis")) {
