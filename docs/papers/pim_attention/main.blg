@@ -3,77 +3,46 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: main.aux
 The style file: icml2024.bst
 Database file #1: ref.bib
-Repeated entry---line 411 of file ref.bib
- : @article{pope2023efficiently
- :                             ,
-I'm skipping whatever remains of this entry
-Repeated entry---line 425 of file ref.bib
- : @article{gpt3
- :              ,
-I'm skipping whatever remains of this entry
-Repeated entry---line 439 of file ref.bib
- : @article{mqa
- :             ,
-I'm skipping whatever remains of this entry
-Repeated entry---line 446 of file ref.bib
- : @article{gqa
- :             ,
-I'm skipping whatever remains of this entry
-Repeated entry---line 453 of file ref.bib
- : @inproceedings{flexgen
- :                       ,
-I'm skipping whatever remains of this entry
-Repeated entry---line 460 of file ref.bib
- : @inproceedings{h2o
- :                   ,
-I'm skipping whatever remains of this entry
-Repeated entry---line 467 of file ref.bib
- : @inproceedings{xiao2023smoothquant
- :                                   ,
-I'm skipping whatever remains of this entry
-Repeated entry---line 481 of file ref.bib
- : @article{zhao2024atom
- :                      ,
-I'm skipping whatever remains of this entry
+Warning--empty booktitle in h2o
 You've used 16 entries,
             2773 wiz_defined-function locations,
-            668 strings with 8251 characters,
-and the built_in function-call counts, 9738 in all, are:
-= -- 777
-> -- 868
-< -- 7
-+ -- 293
-- -- 276
-* -- 836
-:= -- 1551
-add.period$ -- 50
+            658 strings with 8490 characters,
+and the built_in function-call counts, 10468 in all, are:
+= -- 757
+> -- 1122
+< -- 1
++ -- 377
+- -- 360
+* -- 979
+:= -- 1733
+add.period$ -- 48
 call.type$ -- 16
-change.case$ -- 134
+change.case$ -- 164
 chr.to.int$ -- 15
-cite$ -- 32
-duplicate$ -- 375
-empty$ -- 630
-format.name$ -- 296
-if$ -- 1996
+cite$ -- 33
+duplicate$ -- 354
+empty$ -- 584
+format.name$ -- 376
+if$ -- 2072
 int.to.chr$ -- 2
 int.to.str$ -- 1
 missing$ -- 16
 newline$ -- 88
 num.names$ -- 64
-pop$ -- 297
+pop$ -- 358
 preamble$ -- 1
-purify$ -- 118
+purify$ -- 148
 quote$ -- 0
-skip$ -- 321
+skip$ -- 314
 stack$ -- 0
-substring$ -- 184
-swap$ -- 52
-text.length$ -- 2
+substring$ -- 32
+swap$ -- 26
+text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 176
-warning$ -- 0
-while$ -- 58
+warning$ -- 1
+while$ -- 48
 width$ -- 0
-write$ -- 206
-(There were 8 error messages)
+write$ -- 202
+(There was 1 warning)

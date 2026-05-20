@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Homebrew) (preloaded format=pdflatex 2026.3.4)  20 MAY 2026 12:31
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Homebrew) (preloaded format=pdflatex 2026.3.4)  20 MAY 2026 13:00
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1536,53 +1536,12 @@ Underfull \hbox (badness 1360) in paragraph at lines 54--57
 r/m/n/10 bash
  []
 
-LaTeX Info: Symbol \textrightarrow not provided by
-            font family ptm in TS1 encoding.
-            Default family used instead on input line 75.
-LaTeX Info: Symbol \textrightarrow not provided by
-            font family ptm in TS1 encoding.
-            Default family used instead on input line 75.
-LaTeX Info: Symbol \textrightarrow not provided by
-            font family ptm in TS1 encoding.
-            Default family used instead on input line 75.
-LaTeX Info: Symbol \textrightarrow not provided by
-            font family ptm in TS1 encoding.
-            Default family used instead on input line 75.
-[6]
-LaTeX Info: Symbol \textrightarrow not provided by
-            font family ptm in TS1 encoding.
-            Default family used instead on input line 78.
-LaTeX Info: Symbol \textrightarrow not provided by
-            font family ptm in TS1 encoding.
-            Default family used instead on input line 78.
-LaTeX Info: Symbol \textrightarrow not provided by
-            font family ptm in TS1 encoding.
-            Default family used instead on input line 78.
-LaTeX Info: Symbol \textrightarrow not provided by
-            font family ptm in TS1 encoding.
-            Default family used instead on input line 78.
-LaTeX Info: Symbol \textrightarrow not provided by
-            font family ptm in TS1 encoding.
-            Default family used instead on input line 81.
-LaTeX Info: Symbol \textrightarrow not provided by
-            font family ptm in TS1 encoding.
-            Default family used instead on input line 81.
-
-Underfull \hbox (badness 5711) in paragraph at lines 95--97
-\T1/ptm/m/n/10 (+20) keys (\T1/pcr/m/n/10 kivi\T1/ptm/m/n/10 (+20) , \T1/pcr/m/
-n/10 duplex\T1/ptm/m/n/10 (+20) , \T1/pcr/m/n/10 newton2021newton\T1/ptm/m/n/10
- (+20) ).
- []
-
 )
 No file main.bbl.
 
 Package natbib Warning: There were undefined citations.
 
-[7{/opt/homebrew/Cellar/texlive/20260301/share/texmf-dist/fonts/enc/dvips/cm-su
-per/cm-super-ts1.enc}
-
-] (./main.aux)
+[6] (./main.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
@@ -1604,11 +1563,11 @@ Package rerunfilecheck Info: Checksums for `main.out':
 (rerunfilecheck)             After:  D7658C7D479A762F908C87D756A93A11;4640.
  ) 
 Here is how much of TeX's memory you used:
- 31888 strings out of 467525
- 588910 string characters out of 5408440
+ 31858 strings out of 467525
+ 588600 string characters out of 5408440
  1023668 words of memory out of 5000000
- 59891 multiletter control sequences out of 15000+600000
- 683662 words of font info for 274 fonts, out of 8000000 for 9000
+ 59885 multiletter control sequences out of 15000+600000
+ 682183 words of font info for 266 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  99i,14n,131p,1001b,657s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </opt/homebrew/Cellar/texlive/20260301/share/texmf-dist/fonts/type1/public/am
@@ -1621,17 +1580,16 @@ s/cm/cmr7.pfb></opt/homebrew/Cellar/texlive/20260301/share/texmf-dist/fonts/typ
 e1/public/amsfonts/cm/cmsy10.pfb></opt/homebrew/Cellar/texlive/20260301/share/t
 exmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></opt/homebrew/Cellar/texliv
 e/20260301/share/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></op
-t/homebrew/Cellar/texlive/20260301/share/texmf-dist/fonts/type1/public/cm-super
-/sfrm1000.pfb></opt/homebrew/Cellar/texlive/20260301/share/texmf-dist/fonts/typ
-e1/urw/courier/ucrb8a.pfb></opt/homebrew/Cellar/texlive/20260301/share/texmf-di
-st/fonts/type1/urw/courier/ucrr8a.pfb></opt/homebrew/Cellar/texlive/20260301/sh
-are/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></opt/homebrew/Cellar/texlive/2
-0260301/share/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></opt/homebrew/Cellar
-/texlive/20260301/share/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on main.pdf (7 pages, 184527 bytes).
+t/homebrew/Cellar/texlive/20260301/share/texmf-dist/fonts/type1/urw/courier/ucr
+b8a.pfb></opt/homebrew/Cellar/texlive/20260301/share/texmf-dist/fonts/type1/urw
+/courier/ucrr8a.pfb></opt/homebrew/Cellar/texlive/20260301/share/texmf-dist/fon
+ts/type1/urw/times/utmb8a.pfb></opt/homebrew/Cellar/texlive/20260301/share/texm
+f-dist/fonts/type1/urw/times/utmr8a.pfb></opt/homebrew/Cellar/texlive/20260301/
+share/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on main.pdf (6 pages, 176555 bytes).
 PDF statistics:
- 191 PDF objects out of 1000 (max. 8388607)
- 152 compressed objects within 2 object streams
- 70 named destinations out of 1000 (max. 500000)
- 53773 words of extra memory for PDF output out of 61914 (max. 10000000)
+ 166 PDF objects out of 1000 (max. 8388607)
+ 130 compressed objects within 2 object streams
+ 58 named destinations out of 1000 (max. 500000)
+ 52749 words of extra memory for PDF output out of 61914 (max. 10000000)
 
