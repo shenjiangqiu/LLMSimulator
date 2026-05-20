@@ -1,0 +1,199 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{gpt3,taylor2022galactica,yuan2023large,chuang2024understanding}
+\citation{pope2023efficiently}
+\citation{mqa}
+\citation{gqa}
+\citation{h2o}
+\citation{flexgen}
+\citation{vllm}
+\citation{lin2023awq,xiao2023smoothquant,zhao2024atom}
+\citation{flexgen,h2o,zhao2024atom}
+\providecommand \oddpage@label [2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\citation{lin2023awq,xiao2023smoothquant}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Definition of per-token and per-channel quantization. ${\bm  {X}}\in \mathbb  {R}^{l_\text  {prompt}\times d}$ is key/value cache where $l_\text  {prompt}$ is the number of tokens and $d$ is the number of channels. $z_X$ is the zero-point, $s_X$ is the scaling factor.}}{2}{figure.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig: quant scheme}{{1}{2}{Definition of per-token and per-channel quantization. $\mX \in \mathbb {R}^{l_\text {prompt}\times d}$ is key/value cache where $l_\text {prompt}$ is the number of tokens and $d$ is the number of channels. $z_X$ is the zero-point, $s_X$ is the scaling factor}{figure.caption.1}{}}
+\newlabel{fig: quant scheme@cref}{{[figure][1][]1}{[1][2][]2}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Background: Attention Inference-Time Workflow}{2}{section.2}\protected@file@percent }
+\newlabel{sec: background}{{2}{2}{}{section.2}{}}
+\newlabel{sec: background@cref}{{[section][2][]2}{[1][2][]2}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Prefill Phase.}{2}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Decoding Phase.}{2}{equation.1}\protected@file@percent }
+\citation{flexgen}
+\citation{pope2023efficiently,vllm}
+\citation{gptq}
+\citation{flexgen}
+\newlabel{eq: av}{{1}{3}{}{equation.1}{}}
+\newlabel{eq: av@cref}{{[equation][1][]1}{[1][2][]3}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Memory and Speed Analysis.}{3}{equation.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Methodology}{3}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Preliminary Study of KV Cache Quantization}{3}{subsection.3.1}\protected@file@percent }
+\newlabel{sec: quant prelim}{{3.1}{3}{}{subsection.3.1}{}}
+\newlabel{sec: quant prelim@cref}{{[subsection][1][3]3.1}{[1][3][]3}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces The results of simulated KV cache group-wise quantization with various configurations. The group size is set as 32. $\mathbb  {C}$ stands for per-channel quantization and $\mathbb  {T}$ stands for per-token quantization. Please check the whole evaluation in Table \ref {tab:merged-lm-eval}.}}{3}{table.caption.2}\protected@file@percent }
+\newlabel{tab:sub_simulation}{{1}{3}{The results of simulated KV cache group-wise quantization with various configurations. The group size is set as 32. $\mathbb {C}$ stands for per-channel quantization and $\mathbb {T}$ stands for per-token quantization. Please check the whole evaluation in Table \ref {tab:merged-lm-eval}}{table.caption.2}{}}
+\newlabel{tab:sub_simulation@cref}{{[table][1][]1}{[1][3][]3}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Setting.}{3}{figure.caption.3}\protected@file@percent }
+\citation{llmint8,lin2023awq}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Magnitude of key and value cache for Llama-2-13B and Falcon-7B. We observe (1) for key cache, there are a few channels whose magnitudes are very large. (2) for value cache, there is no obvious outlier pattern.}}{4}{figure.caption.3}\protected@file@percent }
+\newlabel{fig: vis}{{2}{4}{Magnitude of key and value cache for Llama-2-13B and Falcon-7B. We observe (1) for key cache, there are a few channels whose magnitudes are very large. (2) for value cache, there is no obvious outlier pattern}{figure.caption.3}{}}
+\newlabel{fig: vis@cref}{{[figure][2][]2}{[1][3][]4}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Why Key and Value Cache Should Quantize Along Different Dimensions?}{4}{subsection.3.2}\protected@file@percent }
+\newlabel{sec: analysis}{{3.2}{4}{}{subsection.3.2}{}}
+\newlabel{sec: analysis@cref}{{[subsection][2][3]3.2}{[1][3][]4}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Analysis of Key Cache.}{4}{subsection.3.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces The relative error statistics averaged over all layers and all heads}}{4}{table.caption.4}\protected@file@percent }
+\newlabel{tab: v cache analysis}{{2}{4}{The relative error statistics averaged over all layers and all heads}{table.caption.4}{}}
+\newlabel{tab: v cache analysis@cref}{{[table][2][]2}{[1][4][]4}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Analysis of Value Cache.}{4}{figure.caption.5}\protected@file@percent }
+\citation{tian2023scan}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The overview of \texttt  {KIVI} algorithm. For ease of illustration, we omit the value cache and attention output parts. The detailed pseudo-code is provided in Algorithm \ref {algo: kivi}. Here ``Q\_Matmul'' is the mix-precision matrix multiplication which fuses the dequantization with matrix multiplication at the tiling level.}}{5}{figure.caption.5}\protected@file@percent }
+\newlabel{fig: kivi}{{3}{5}{The overview of \kivi {} algorithm. For ease of illustration, we omit the value cache and attention output parts. The detailed pseudo-code is provided in Algorithm \ref {algo: kivi}. Here ``Q\_Matmul'' is the mix-precision matrix multiplication which fuses the dequantization with matrix multiplication at the tiling level}{figure.caption.5}{}}
+\newlabel{fig: kivi@cref}{{[figure][3][]3}{[1][4][]5}{}{}{}}
+\newlabel{eq: att}{{2}{5}{}{equation.2}{}}
+\newlabel{eq: att@cref}{{[equation][2][]2}{[1][5][]5}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}\texttt  {KIVI}: Algorithm and System Support}{5}{subsection.3.3}\protected@file@percent }
+\newlabel{sec: algo}{{3.3}{5}{}{subsection.3.3}{}}
+\newlabel{sec: algo@cref}{{[subsection][3][3]3.3}{[1][5][]5}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Algorithm.}{5}{subsection.3.3}\protected@file@percent }
+\newlabel{eq: attquant}{{3}{5}{}{equation.3}{}}
+\newlabel{eq: attquant@cref}{{[equation][3][]3}{[1][5][]5}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Analysis.}{5}{equation.3}\protected@file@percent }
+\citation{touvron2023llama,touvron2023llama2}
+\citation{penedo2023refinedweb}
+\citation{jiang2023mistral}
+\citation{mqa}
+\citation{flexgen}
+\citation{eval-harness}
+\citation{bai2023longbench}
+\@writefile{toc}{\contentsline {paragraph}{System Support.}{6}{equation.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experiments}{6}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Settings}{6}{subsection.4.1}\protected@file@percent }
+\newlabel{sec: setting}{{4.1}{6}{}{subsection.4.1}{}}
+\newlabel{sec: setting@cref}{{[subsection][1][4]4.1}{[1][6][]6}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Models.}{6}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Tasks.}{6}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Accuracy and Efficiency Analysis}{6}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.1}Comparison Between Different Quantization Configurations}{6}{subsubsection.4.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}Accuracy Comparison on Generation Tasks}{6}{subsubsection.4.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{LM-Eval Results.}{6}{figure.caption.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{LongBench Results.}{6}{figure.caption.8}\protected@file@percent }
+\citation{vllm}
+\citation{shargpt}
+\citation{vllm}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Needle-in-a-Haystack results on Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2. Here we count the number of words instead of tokens to better account for the tokenizer difference. The final token length is noted in the upper right corners of each figure. Detailed setting can be found in Appendix \ref {app: niah}.}}{7}{figure.caption.8}\protected@file@percent }
+\newlabel{fig: needle}{{4}{7}{Needle-in-a-Haystack results on Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2. Here we count the number of words instead of tokens to better account for the tokenizer difference. The final token length is noted in the upper right corners of each figure. Detailed setting can be found in Appendix \ref {app: niah}}{figure.caption.8}{}}
+\newlabel{fig: needle@cref}{{[figure][4][]4}{[1][6][]7}{}{}{}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {\!Llama-3-8B-Instruct Baseline}}}{7}{figure.caption.8}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {\!Llama-3-8B-Instruct + \texttt {KIVI-2}}}}{7}{figure.caption.8}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {\!Llama-3-8B-Instruct + \texttt {KIVI-4}}}}{7}{figure.caption.8}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {\!Mistral-7B-Instruct-v0.2 Baseline}}}{7}{figure.caption.8}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(e)}{\ignorespaces {\!Mistral-7B-Instruct-v0.2 + \texttt {KIVI-2}}}}{7}{figure.caption.8}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(f)}{\ignorespaces {\!Mistral-7B-Instruct-v0.2 + \texttt {KIVI-4}}}}{7}{figure.caption.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{NIAH Results.}{7}{figure.caption.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.3}Ablation}{7}{subsubsection.4.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.4}Efficiency Comparison}{7}{subsubsection.4.2.4}\protected@file@percent }
+\newlabel{sec: efficiency}{{4.2.4}{7}{}{subsubsection.4.2.4}{}}
+\newlabel{sec: efficiency@cref}{{[subsubsection][4][4,2]4.2.4}{[1][7][]7}{}{}{}}
+\citation{pope2023efficiently,yuan2024kv}
+\citation{gptq,lin2023awq,kim2023squeezellm,xu2023compress}
+\citation{lin2023awq}
+\citation{gptq}
+\citation{kim2023squeezellm}
+\citation{xiao2023smoothquant}
+\citation{zhao2024atom}
+\citation{flexgen}
+\citation{zhao2024atom}
+\citation{hooper2024kvquant}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Performance comparison between 16bit, 4-bit per-token quantization, four fake 2bit KV cache quantization similar to those in Table \ref {tab:sub_simulation}, \texttt  {KIVI-2} (2bit) / \texttt  {KIVI-4} (4bit) across various models. We emphasize that unlike \texttt  {KIVI}, which preserves a small portion of full precision key cache ${\bm  {X}}_{K_r}$ and value cache ${\bm  {X}}_{V_r}$, all tokens in fake KV cache quantization are quantized for a fair comparison. $\mathbb  {C}$ stands for per-channel quantization and $\mathbb  {T}$ stands for per-token quantization.}}{8}{table.caption.6}\protected@file@percent }
+\newlabel{tab:merged-lm-eval}{{3}{8}{Performance comparison between 16bit, 4-bit per-token quantization, four fake 2bit KV cache quantization similar to those in Table \ref {tab:sub_simulation}, \kivitwo {} (2bit) / \kivifour {} (4bit) across various models. We emphasize that unlike \kivi {}, which preserves a small portion of full precision key cache $\mX _{K_r}$ and value cache $\mX _{V_r}$, all tokens in fake KV cache quantization are quantized for a fair comparison. $\mathbb {C}$ stands for per-channel quantization and $\mathbb {T}$ stands for per-token quantization}{table.caption.6}{}}
+\newlabel{tab:merged-lm-eval@cref}{{[table][3][]3}{[1][6][]8}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Memory usage and throughput comparison between 2bit \texttt  {KIVI} and 16bit baseline. \texttt  {KIVI} can achieve higher throughput by enabling a larger batch size.}}{8}{figure.caption.10}\protected@file@percent }
+\newlabel{fig: throughput}{{5}{8}{Memory usage and throughput comparison between 2bit \kivi {} and 16bit baseline. \kivi {} can achieve higher throughput by enabling a larger batch size}{figure.caption.10}{}}
+\newlabel{fig: throughput@cref}{{[figure][5][]5}{[1][7][]8}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Related Work}{8}{section.5}\protected@file@percent }
+\citation{vllm}
+\citation{jin2023s}
+\citation{h2o}
+\citation{liu2024scissorhands}
+\citation{xiao2023efficient}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Performance evaluation of \texttt  {KIVI} on various models across a range of benchmarks in LongBench. We highlight the average performance of our method. \textbf  {More similar results on Mistral-7B-v0.2 and LongChat-7b-v1.5 can be found in Table \ref {table:longchat} and Table \ref {table:mistral}}}}{9}{table.caption.7}\protected@file@percent }
+\newlabel{tab:longbench}{{4}{9}{Performance evaluation of \kivi {} on various models across a range of benchmarks in LongBench. We highlight the average performance of our method. \textbf {More similar results on Mistral-7B-v0.2 and LongChat-7b-v1.5 can be found in Table \ref {table:longchat} and Table \ref {table:mistral}}}{table.caption.7}{}}
+\newlabel{tab:longbench@cref}{{[table][4][]4}{[1][6][]9}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Ablation study of \texttt  {KIVI} by changing group size $G$ and residual length $R$.}}{9}{table.caption.9}\protected@file@percent }
+\newlabel{tab:abl}{{5}{9}{Ablation study of \kivi {} by changing group size $G$ and residual length $R$}{table.caption.9}{}}
+\newlabel{tab:abl@cref}{{[table][5][]5}{[1][7][]9}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion and Future Work}{9}{section.6}\protected@file@percent }
+\bibstyle{plainnat}
+\bibdata{ref}
+\bibcite{shargpt}{{1}{2023}{{sha}}{{}}}
+\bibcite{gqa}{{2}{2023}{{Ainslie et~al.}}{{Ainslie, Lee-Thorp, de~Jong, Zemlyanskiy, Lebr{\'o}n, and Sanghai}}}
+\bibcite{bai2023longbench}{{3}{2023}{{Bai et~al.}}{{Bai, Lv, Zhang, Lyu, Tang, Huang, Du, Liu, Zeng, Hou, Dong, Tang, and Li}}}
+\bibcite{gpt3}{{4}{2020}{{Brown et~al.}}{{Brown, Mann, Ryder, Subbiah, Kaplan, Dhariwal, Neelakantan, Shyam, Sastry, Askell, et~al.}}}
+\bibcite{chuang2024understanding}{{5}{2024}{{Chuang et~al.}}{{Chuang, Li, Yuan, Wang, Lai, Yu, Ding, Chang, Tan, Zha, et~al.}}}
+\bibcite{llmint8}{{6}{2022}{{Dettmers et~al.}}{{Dettmers, Lewis, Belkada, and Zettlemoyer}}}
+\bibcite{gptq}{{7}{2022}{{Frantar et~al.}}{{Frantar, Ashkboos, Hoefler, and Alistarh}}}
+\bibcite{eval-harness}{{8}{2021}{{Gao et~al.}}{{Gao, Tow, Biderman, Black, DiPofi, Foster, Golding, Hsu, McDonell, Muennighoff, et~al.}}}
+\bibcite{hooper2024kvquant}{{9}{2024}{{Hooper et~al.}}{{Hooper, Kim, Mohammadzadeh, Mahoney, Shao, Keutzer, and Gholami}}}
+\bibcite{jiang2023mistral}{{10}{2023}{{Jiang et~al.}}{{Jiang, Sablayrolles, Mensch, Bamford, Chaplot, Casas, Bressand, Lengyel, Lample, Saulnier, et~al.}}}
+\bibcite{jin2023s}{{11}{2023}{{Jin et~al.}}{{Jin, Wu, Brooks, and Wei}}}
+\bibcite{kim2023squeezellm}{{12}{2023}{{Kim et~al.}}{{Kim, Hooper, Gholami, Dong, Li, Shen, Mahoney, and Keutzer}}}
+\bibcite{vllm}{{13}{2023}{{Kwon et~al.}}{{Kwon, Li, Zhuang, Sheng, Zheng, Yu, Gonzalez, Zhang, and Stoica}}}
+\bibcite{lin2023awq}{{14}{2023}{{Lin et~al.}}{{Lin, Tang, Tang, Yang, Dang, and Han}}}
+\bibcite{liu2024scissorhands}{{15}{2024}{{Liu et~al.}}{{Liu, Desai, Liao, Wang, Xie, Xu, Kyrillidis, and Shrivastava}}}
+\bibcite{mohtashami2023passkey}{{16}{2023}{{Mohtashami and Jaggi}}{{}}}
+\bibcite{penedo2023refinedweb}{{17}{2023}{{Penedo et~al.}}{{Penedo, Malartic, Hesslow, Cojocaru, Cappelli, Alobeidli, Pannier, Almazrouei, and Launay}}}
+\bibcite{pope2023efficiently}{{18}{2023}{{Pope et~al.}}{{Pope, Douglas, Chowdhery, Devlin, Bradbury, Heek, Xiao, Agrawal, and Dean}}}
+\bibcite{reid2024gemini}{{19}{2024}{{Reid et~al.}}{{Reid, Savinov, Teplyashin, Lepikhin, Lillicrap, Alayrac, Soricut, Lazaridou, Firat, Schrittwieser, et~al.}}}
+\bibcite{mqa}{{20}{2019}{{Shazeer}}{{}}}
+\bibcite{flexgen}{{21}{2023}{{Sheng et~al.}}{{Sheng, Zheng, Yuan, Li, Ryabinin, Chen, Liang, R{\'e}, Stoica, and Zhang}}}
+\bibcite{taylor2022galactica}{{22}{2022}{{Taylor et~al.}}{{Taylor, Kardas, Cucurull, Scialom, Hartshorn, Saravia, Poulton, Kerkez, and Stojnic}}}
+\bibcite{tian2023scan}{{23}{2023}{{Tian et~al.}}{{Tian, Wang, Chen, and Du}}}
+\bibcite{touvron2023llama}{{24}{2023{a}}{{Touvron et~al.}}{{Touvron, Lavril, Izacard, Martinet, Lachaux, Lacroix, Rozi{\`e}re, Goyal, Hambro, Azhar, et~al.}}}
+\bibcite{touvron2023llama2}{{25}{2023{b}}{{Touvron et~al.}}{{Touvron, Martin, Stone, Albert, Almahairi, Babaei, Bashlykov, Batra, Bhargava, Bhosale, et~al.}}}
+\bibcite{xiao2023smoothquant}{{26}{2023{a}}{{Xiao et~al.}}{{Xiao, Lin, Seznec, Wu, Demouth, and Han}}}
+\bibcite{xiao2023efficient}{{27}{2023{b}}{{Xiao et~al.}}{{Xiao, Tian, Chen, Han, and Lewis}}}
+\bibcite{xu2023compress}{{28}{2023}{{Xu et~al.}}{{Xu, Liu, Chen, Tang, Wang, Zhou, Hu, and Shrivastava}}}
+\bibcite{yuan2023large}{{29}{2023}{{Yuan et~al.}}{{Yuan, Tang, Jiang, and Hu}}}
+\bibcite{yuan2024kv}{{30}{2024}{{Yuan et~al.}}{{Yuan, Liu, Zhong, Chuang, Li, Wang, Le, Jin, Chaudhary, Xu, Liu, and Hu}}}
+\bibcite{h2o}{{31}{2023}{{Zhang et~al.}}{{Zhang, Sheng, Zhou, Chen, Zheng, Cai, Song, Tian, R{\'e}, Barrett, et~al.}}}
+\bibcite{zhao2024atom}{{32}{2024}{{Zhao et~al.}}{{Zhao, Lin, Zhu, Ye, Chen, Zheng, Ceze, Krishnamurthy, Chen, and Kasikci}}}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Detailed Implementations}{12}{appendix.A}\protected@file@percent }
+\newlabel{app: implement}{{A}{12}{Impact Statement}{appendix.A}{}}
+\newlabel{app: implement@cref}{{[section][1][]A}{[1][12][]12}{}{}{}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces The \texttt  {KIVI} Prefill \& Decoding Algorithm}}{12}{algocf.1}\protected@file@percent }
+\newlabel{algo: kivi}{{1}{12}{Impact Statement}{algocf.1}{}}
+\newlabel{algo: kivi@cref}{{[algocf][1][]1}{[1][12][]12}{}{}{}}
+\citation{mohtashami2023passkey}
+\citation{reid2024gemini}
+\citation{mohtashami2023passkey}
+\citation{reid2024gemini}
+\@writefile{toc}{\contentsline {section}{\numberline {B}NIAH Setting}{13}{appendix.B}\protected@file@percent }
+\newlabel{app: niah}{{B}{13}{Impact Statement}{appendix.B}{}}
+\newlabel{app: niah@cref}{{[section][2][]B}{[1][13][]13}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {C}More Ablation Results}{13}{appendix.C}\protected@file@percent }
+\newlabel{app: abl}{{C}{13}{Impact Statement}{appendix.C}{}}
+\newlabel{app: abl@cref}{{[section][3][]C}{[1][13][]13}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Performance comparison between 16bit, \texttt  {KIVI-2} (2bit) / \texttt  {KIVI-4} (4bit) with residual length 128 and 32 across various models. $R32$ stands for residual length 32.}}{13}{table.caption.15}\protected@file@percent }
+\newlabel{tab: abl lmeval}{{6}{13}{Performance comparison between 16bit, \kivitwo {} (2bit) / \kivifour {} (4bit) with residual length 128 and 32 across various models. $R32$ stands for residual length 32}{table.caption.15}{}}
+\newlabel{tab: abl lmeval@cref}{{[table][6][]6}{[1][13][]13}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {D}More Experimental Results}{13}{appendix.D}\protected@file@percent }
+\newlabel{app: exp}{{D}{13}{Impact Statement}{appendix.D}{}}
+\newlabel{app: exp@cref}{{[section][4][]D}{[1][13][]13}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Performance evaluation of \texttt  {KIVI} with residual length 128 and 32 on various models across a range of benchmarks in LongBench. $R32$ stands for residual length 32.}}{14}{table.caption.16}\protected@file@percent }
+\newlabel{tab: abl longbench}{{7}{14}{Performance evaluation of \kivi {} with residual length 128 and 32 on various models across a range of benchmarks in LongBench. $R32$ stands for residual length 32}{table.caption.16}{}}
+\newlabel{tab: abl longbench@cref}{{[table][7][]7}{[1][13][]14}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces The results of Llama-3-8B-Instruct with \texttt  {KIVI} on LongBench. The model has 8K context length and applies group query attention, which uses 8 heads for KV cache instead of the full 32 heads. We use a 32 group size and 128 residual length for both \texttt  {KIVI-2} and \texttt  {KIVI-4}. The baseline is of full precision.}}{14}{table.caption.17}\protected@file@percent }
+\newlabel{table:llama3}{{8}{14}{The results of Llama-3-8B-Instruct with \kivi {} on LongBench. The model has 8K context length and applies group query attention, which uses 8 heads for KV cache instead of the full 32 heads. We use a 32 group size and 128 residual length for both \kivitwo {} and \kivifour {}. The baseline is of full precision}{table.caption.17}{}}
+\newlabel{table:llama3@cref}{{[table][8][]8}{[1][13][]14}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces The results of Mistral-7B-Instruct-v0.2 with \texttt  {KIVI} on LongBench. The model has 32K context length and applies group query attention, which uses 8 heads for KV cache instead of the full 32 heads. We use a 32 group size and 128 residual length for both \texttt  {KIVI-2} and \texttt  {KIVI-4}. The baseline is of full precision.}}{14}{table.caption.18}\protected@file@percent }
+\newlabel{table:mistral}{{9}{14}{The results of Mistral-7B-Instruct-v0.2 with \kivi {} on LongBench. The model has 32K context length and applies group query attention, which uses 8 heads for KV cache instead of the full 32 heads. We use a 32 group size and 128 residual length for both \kivitwo {} and \kivifour {}. The baseline is of full precision}{table.caption.18}{}}
+\newlabel{table:mistral@cref}{{[table][9][]9}{[1][13][]14}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces The results of LongChat-7B-v1.5-32K with \texttt  {KIVI} on LongBench. The model has 32K context length. We use a 32 group size and 128 residual length for both \texttt  {KIVI-2} and \texttt  {KIVI-4}. The baseline is of full precision.}}{15}{table.caption.19}\protected@file@percent }
+\newlabel{table:longchat}{{10}{15}{The results of LongChat-7B-v1.5-32K with \kivi {} on LongBench. The model has 32K context length. We use a 32 group size and 128 residual length for both \kivitwo {} and \kivifour {}. The baseline is of full precision}{table.caption.19}{}}
+\newlabel{table:longchat@cref}{{[table][10][]10}{[1][13][]15}{}{}{}}
+\gdef \@abspage@last{15}
