@@ -1,0 +1,120 @@
+\begin{thebibliography}{16}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Ainslie et~al.(2023)Ainslie, Lee-Thorp, de~Jong, Zemlyanskiy,
+  Lebr{\'o}n, and Sanghai]{gqa}
+Ainslie, J., Lee-Thorp, J., de~Jong, M., Zemlyanskiy, Y., Lebr{\'o}n, F., and
+  Sanghai, S.
+\newblock Gqa: Training generalized multi-query transformer models from
+  multi-head checkpoints.
+\newblock \emph{arXiv preprint arXiv:2305.13245}, 2023.
+
+\bibitem[Brown et~al.(2020{\natexlab{a}})Brown, Mann, Ryder, Subbiah, Kaplan,
+  Dhariwal, Neelakantan, Shyam, Sastry, Askell, et~al.]{gpt3}
+Brown, T., Mann, B., Ryder, N., Subbiah, M., Kaplan, J.~D., Dhariwal, P.,
+  Neelakantan, A., Shyam, P., Sastry, G., Askell, A., et~al.
+\newblock Language models are few-shot learners.
+\newblock \emph{Advances in neural information processing systems},
+  33:\penalty0 1877--1901, 2020{\natexlab{a}}.
+
+\bibitem[Brown et~al.(2020{\natexlab{b}})]{brown2020language}
+Brown, T. et~al.
+\newblock Language models are few-shot learners.
+\newblock \emph{Advances in Neural Information Processing Systems (NeurIPS)},
+  2020{\natexlab{b}}.
+
+\bibitem[Dao et~al.(2022)Dao, Fu, Ermon, Rudra, and
+  R{\'e}]{dao2022flashattention}
+Dao, T., Fu, D., Ermon, S., Rudra, A., and R{\'e}, C.
+\newblock Flashattention: Fast and memory-efficient exact attention with
+  io-awareness.
+\newblock In \emph{NeurIPS}, 2022.
+
+\bibitem[Dettmers et~al.(2022)]{dettmers2022llmint8}
+Dettmers, T. et~al.
+\newblock Llm.int8(): 8-bit matrix multiplication for transformers at scale.
+\newblock \emph{NeurIPS}, 2022.
+
+\bibitem[Ke et~al.(2021)]{newton2021newton}
+Ke, L. et~al.
+\newblock Newton: A dram-maker's accelerator-in-memory for dnn training.
+\newblock In \emph{IEEE International Symposium on High-Performance Computer
+  Architecture (HPCA)}, 2021.
+
+\bibitem[Liu et~al.(2024)Liu, Yuan, Jin, Zhong, Xu, Braverman, Chen, and
+  Hu]{kivi}
+Liu, Z., Yuan, J., Jin, H., Zhong, S., Xu, Z., Braverman, V., Chen, B., and Hu,
+  X.
+\newblock Kivi: A tuning-free asymmetric 2bit quantization for kv cache.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2024.
+
+\bibitem[Mutlu et~al.(2020)Mutlu, Ghose, G{\'o}mez-Luna, and
+  Ausavarungnirun]{mutlu2020processing}
+Mutlu, O., Ghose, S., G{\'o}mez-Luna, J., and Ausavarungnirun, R.
+\newblock Processing data where it makes sense: Enabling in-memory computation.
+\newblock In \emph{MicPro}, 2020.
+
+\bibitem[Pope et~al.(2023)Pope, Douglas, Chowdhery, Devlin, Bradbury, Heek,
+  Xiao, Agrawal, and Dean]{pope2023efficiently}
+Pope, R., Douglas, S., Chowdhery, A., Devlin, J., Bradbury, J., Heek, J., Xiao,
+  K., Agrawal, S., and Dean, J.
+\newblock Efficiently scaling transformer inference.
+\newblock \emph{Proceedings of Machine Learning and Systems}, 5, 2023.
+
+\bibitem[Seshadri et~al.(2017)]{seshadri2017ambit}
+Seshadri, V. et~al.
+\newblock Ambit: In-memory accelerator for bulk bitwise operations using
+  commodity dram technology.
+\newblock In \emph{IEEE/ACM International Symposium on Microarchitecture
+  (MICRO)}, 2017.
+
+\bibitem[Shazeer(2019)]{mqa}
+Shazeer, N.
+\newblock Fast transformer decoding: One write-head is all you need.
+\newblock \emph{arXiv preprint arXiv:1911.02150}, 2019.
+
+\bibitem[Sheng et~al.(2023)Sheng, Zheng, Yuan, Li, Ryabinin, Chen, Liang,
+  R{\'e}, Stoica, and Zhang]{flexgen}
+Sheng, Y., Zheng, L., Yuan, B., Li, Z., Ryabinin, M., Chen, B., Liang, P.,
+  R{\'e}, C., Stoica, I., and Zhang, C.
+\newblock Flexgen: High-throughput generative inference of large language
+  models with a single gpu.
+\newblock In \emph{International Conference on Machine Learning}, pp.\
+  31094--31116. PMLR, 2023.
+
+\bibitem[Xiao et~al.(2023)Xiao, Lin, Seznec, Wu, Demouth, and
+  Han]{xiao2023smoothquant}
+Xiao, G., Lin, J., Seznec, M., Wu, H., Demouth, J., and Han, S.
+\newblock Smoothquant: Accurate and efficient post-training quantization for
+  large language models.
+\newblock In \emph{International Conference on Machine Learning}, pp.\
+  38087--38099. PMLR, 2023.
+
+\bibitem[Yun et~al.(2024)Yun, Kyung, and Cho]{duplex}
+Yun, S., Kyung, K., and Cho, J.
+\newblock Duplex: A device for large language models with mixture of experts,
+  grouped query attention, and continuous batching.
+\newblock In \emph{IEEE/ACM International Symposium on Microarchitecture
+  (MICRO)}, 2024.
+
+\bibitem[Zhang et~al.(2023)Zhang, Sheng, Zhou, Chen, Zheng, Cai, Song, Tian,
+  R{\'e}, Barrett, et~al.]{h2o}
+Zhang, Z., Sheng, Y., Zhou, T., Chen, T., Zheng, L., Cai, R., Song, Z., Tian,
+  Y., R{\'e}, C., Barrett, C., et~al.
+\newblock H $ \_2 $ o: Heavy-hitter oracle for efficient generative inference
+  of large language models.
+\newblock \emph{arXiv preprint arXiv:2306.14048}, 2023.
+
+\bibitem[Zhao et~al.(2024)Zhao, Lin, Zhu, Ye, Chen, Zheng, Ceze, Krishnamurthy,
+  Chen, and Kasikci]{zhao2024atom}
+Zhao, Y., Lin, C.-Y., Zhu, K., Ye, Z., Chen, L., Zheng, S., Ceze, L.,
+  Krishnamurthy, A., Chen, T., and Kasikci, B.
+\newblock Atom: Low-bit quantization for efficient and accurate llm serving.
+\newblock \emph{Proceedings of Machine Learning and Systems}, 6:\penalty0
+  196--209, 2024.
+
+\end{thebibliography}

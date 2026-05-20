@@ -1,0 +1,47 @@
+\section{Introduction}
+
+Large Language Models (LLMs) have become the backbone of modern AI applications, powering everything from conversational agents to code generation~\citep{gpt3,brown2020language}.
+However, their deployment at scale remains prohibitively expensive due to the massive computational and memory requirements.
+A key bottleneck in LLM inference is the key-value (KV) cache, which stores attention keys and values for all previously generated tokens to avoid recomputation~\citep{pope2023efficiently}.
+In long-context and large-batch scenarios, the KV cache can exceed the model parameters by multiple times: for a 540B PaLM model with batch size 512 and context length 2048, the KV cache alone consumes 3TB of memory~\citep{pope2023efficiently}.
+
+To address this, quantization techniques reduce the bit-width of KV cache entries.
+Among these, \kivi{}~\citep{kivi} proposes tuning-free asymmetric 2-bit quantization, achieving substantial memory savings without model retraining.
+\kivi{} uses per-channel quantization for keys and per-token quantization for values, with asymmetric zero-points to handle the non-uniform distribution of attention tensors.
+% TODO Figure 1: KV cache memory growth with context length, showing 2-bit vs FP16 comparison
+
+While \kivi{} effectively reduces KV cache \emph{size}, the dequantization required during attention computation introduces new challenges.
+The asymmetric dot product expands into:
+\begin{equation}
+Q \cdot K_i \approx s_Q s_K \left[\sum_{j=1}^{d} \hat{q}_j \hat{k}_{ij} - z_K\sum_{j=1}^{d} \hat{q}_j - z_Q\sum_{j=1}^{d} \hat{k}_{ij} + d z_Q z_K\right]
+\label{eq:asym_dot}
+\end{equation}
+This expansion reveals that beyond the standard dot product $\sum \hat{q}\hat{k}$, asymmetric quantization requires three additional terms: two channel-wise sums and a constant correction.
+On GPU, these extra operations add significant latency, partially offsetting the memory bandwidth savings from 2-bit storage.
+
+Processing-in-memory (PIM) offers a promising alternative by placing compute units close to where data resides~\citep{mutlu2020processing}.
+Prior PIM designs for attention~\citep{duplex} have used logic-die PIM, which places compute units on a separate logic die connected via through-silicon vias (TSVs).
+However, logic-die PIM suffers from limited bandwidth between compute units and memory banks, making it unsuitable for the fine-grained, mixed-precision operations required by asymmetric quantized attention.
+
+% TODO Figure 2: Architecture comparison - GPU-only vs logic-die PIM vs near-bank PIM
+
+In this paper, we propose \pimattn{}, a heterogeneous attention framework that strategically maps different stages of asymmetric quantized attention to the most suitable compute substrate.
+Our key insight is that the decomposed operations in Eq.~\ref{eq:asym_dot} have fundamentally different computational characteristics:
+\begin{itemize}
+\item The main dot product $\sum \hat{q}\hat{k}$ and the reduction sums $\sum\hat{q}$, $\sum\hat{k}$ operate on 2-bit quantized data — ideal for near-bank PIM with efficient 2-bit processing elements (PEs).
+\item The score-value ($S\cdot V$) operation involves float16 attention scores and dequantized values — better suited for GPU's massive float16 throughput.
+\item The softmax operation is computationally lightweight and naturally stays on GPU.
+\end{itemize}
+
+\pimattn{} decomposes the asymmetric attention into three phases: (1) near-bank PIM executes the Q@K dot product with inline asymmetric reduction on 2-bit data, (2) GPU computes softmax, and (3) GPU handles the float16-intensive score@V operation.
+We implement a cycle-accurate simulator modeling the near-bank PIM architecture with configurable row-buffer pipelines, PE microarchitecture, and heterogeneous execution timelines.
+Our evaluation on Llama-3-8B with 16K context demonstrates that \pimattn{} achieves $2.1\mu s$ per-sequence Q@K latency with 2-bit KV on 2048 PIM banks — $1.4\times$ faster than GPU execution.
+Furthermore, we show that PIM-side dequantization (expanding 2-bit to float16 before compute) incurs $2\times$ overhead, validating our direct 2-bit compute approach.
+
+Our contributions are:
+\begin{itemize}
+\item We identify the computational mismatch between asymmetric quantized attention and existing hardware substrates, motivating a heterogeneous decomposition.
+\item We design \pimattn{}, mapping decomposed asymmetric Q@K operations to near-bank PIM with efficient 2-bit PEs, while routing float16-heavy operations to GPU.
+\item We build a cycle-accurate PIM simulator with per-stage timing breakdown, PIM cycle verification, and configurable PE microarchitecture.
+\item We provide comprehensive experimental analysis across six configurations, demonstrating the tradeoffs between direct 2-bit compute and dequantize-then-compute approaches.
+\end{itemize}

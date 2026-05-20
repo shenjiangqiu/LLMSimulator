@@ -1,0 +1,27 @@
+\section{Related Work}
+\label{sec:related}
+
+\textbf{KV Cache Quantization}. Reducing KV cache memory footprint through quantization has gained significant attention.
+FlexGen~\citep{flexgen} and H2O~\citep{h2o} apply 4-bit round-to-nearest quantization to compress KV cache.
+Atom~\citep{zhao2024atom} further explores low-bit quantization with token-wise dynamic pruning.
+\kivi{}~\citep{kivi} proposes the first tuning-free asymmetric 2-bit quantization specifically designed for KV cache, using per-channel quantization for keys to handle outlier channels and per-token quantization for values.
+Our work builds directly on \kivi{}'s asymmetric formulation but addresses the \emph{computational} challenge of executing these operations efficiently on hardware.
+
+\textbf{Processing-in-Memory for ML}. PIM architectures have been extensively studied for accelerating machine learning workloads.
+Ambit~\citep{seshadri2017ambit} demonstrates bulk bitwise operations in DRAM for data-intensive tasks.
+Newton~\citep{newton2021newton} proposes a near-bank PIM accelerator for DNN training with gradient reduction in memory.
+For LLM inference, Duplex~\citep{duplex} combines logic-die PIM with GPU for heterogeneous attention execution, but focuses on float16 operations without quantization support.
+In contrast, \pimattn{} specifically targets quantized attention with efficient 2-bit near-bank compute units.
+
+\textbf{Attention Optimization}. Numerous works aim to optimize attention computation efficiency.
+FlashAttention~\citep{dao2022flashattention} uses tiling to reduce HBM accesses by fusing attention operations in SRAM.
+Multi-query attention~\citep{mqa} and grouped-query attention~\citep{gqa} reduce KV heads to decrease cache size.
+Our approach is orthogonal: we accept the standard attention formulation but optimize the hardware mapping for quantized execution.
+
+\textbf{Mixed-Precision LLM Inference}. Several recent efforts combine multiple precisions in LLM inference.
+LLM.int8()~\citep{dettmers2022llmint8} uses mixed-precision decomposition for outlier features.
+SmoothQuant~\citep{xiao2023smoothquant} migrates quantization difficulty from activations to weights.
+\pimattn{} introduces a new dimension of mixed-precision execution: spatial heterogeneity across PIM and GPU for different stages of attention.
+
+\textbf{Positioning}. To the best of our knowledge, \pimattn{} is the first work to:
+(1) decompose asymmetric quantized attention for heterogeneous PIM-GPU execution, (2) implement efficient 2-bit near-bank compute for the decomposed operations, and (3) provide cycle-accurate modeling with analytical verification.

@@ -1,0 +1,97 @@
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
+
+We presented \pimattn{}, a heterogeneous attention framework that maps decomposed asymmetric quantized attention operations to near-bank PIM for efficient LLM inference.
+Our key insight is that the asymmetric dot product $Q\cdot K \approx s_Q s_K[\sum \hat{q}\hat{k} - z_K\sum\hat{q} - z_Q\sum\hat{k} + d z_Q z_K]$ decomposes into 2-bit-compatible operations ideal for near-bank PIM, while float16-intensive score@V operations remain on GPU.
+Cycle-accurate simulation on Llama-3-8B demonstrates $1.4\times$ per-sequence Q@K speedup over GPU with 2-bit KV on 2048 PIM banks.
+Our results show that direct 2-bit PIM compute is $2\times$ more efficient than dequantize-then-compute approaches.
+
+Future directions include: (1) extending to prefill-mode attention where larger batch dimensions amortize asymmetric reduction overhead, (2) integrating with FlashAttention-style tiling for further memory optimization, and (3) exploring higher radix quantization (4-bit, 8-bit) with corresponding PE configurations.
+
+\section*{Acknowledgments}
+We thank the anonymous reviewers for their constructive feedback.
+
+\newpage
+\section{Appendix: Extended Results and Implementation Details}
+
+\subsection{Complete Experiment Data}
+
+Table~\ref{tab:full} provides the complete per-step breakdown for all six experiments.
+
+\begin{table}[h]
+\caption{Complete per-step attention latency ($\mu s$).}
+\label{tab:full}
+\centering
+\small
+\begin{tabular}{lcccccccc}
+\toprule
+\textbf{Config} & \textbf{Total} & \textbf{Layer} & \textbf{Gen} & \textbf{Q@K} & \textbf{Softmax} & \textbf{S@V} & \textbf{pim\_rb} & \textbf{pim\_pe} \\
+\midrule
+FP16 GPU   & 5623 & 176 & 95  & 97 & 0.00 & -- & -- & -- \\
+FP16 PIM   & 6788 & 212 & 132 & 66 & 0.03 & 66 & 131 & 66 \\
+2-bit GPU  & 2769 & 87  & 48  & 48 & 0.00 & -- & -- & -- \\
+2-bit Hyb. & 3460 & 108 & 67  & 33 & 0.01 & 34 & 33  & 17 \\
+2-bit All  & 3443 & 108 & 66  & 33 & 0.01 & 33 & 66  & 33 \\
+2-bit Deq. & 5555 & 174 & 132 & 66 & 0.01 & 66 & 66  & 99 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Simulator Configuration}
+
+The PIM simulator parameters used in our evaluation:
+\begin{itemize}[nosep]
+\item $N_{\text{banks}} = 2048$ (8 HBM3E stacks $\times$ 256 PIM banks)
+\item $R = 2048$ B row buffer
+\item $W_{\text{fp16}} = 16$ B/cycle, $\tau_{\text{fp16}} = 0.5$ ns (2 GHz)
+\item $W_{\text{lowbit}} = 32$ B/cycle, $\tau_{\text{lowbit}} = 0.5$ ns
+\item $B = 32$ GB/s per-bank DRAM-to-rowbuffer bandwidth
+\item Asymmetric quant: $z_Q = 1.0$, $z_K = 2.0$
+\end{itemize}
+
+\subsection{Reproducibility}
+
+All experiments can be reproduced using the provided simulator and configuration files.
+Run \texttt{bash tools/run\_all.sh} to execute all six experiments and generate the comparison report.
+The simulator source code, including the near-bank PIM latency model and per-stage timing instrumentation, is available in the repository.
+
+% ===========================================================================
+% TODO LIST FOR PAPER COMPLETION
+% ===========================================================================
+\subsection*{TODO: Items Requiring Completion}
+
+The following items need to be addressed for the final version of this paper:
+
+\begin{enumerate}
+
+\item \textbf{Figure 1 — KV Cache Memory Growth}:
+Bar chart showing KV cache memory consumption for Llama-3-8B at various context lengths (4K, 8K, 16K, 32K, 128K) comparing FP16 vs. 2-bit quantization.
+Data: FP16 KV cache = $2 \times n_{\text{layers}} \times d_{\text{kv}} \times L \times 2\text{B}$; 2-bit = same $\times 0.25$.
+
+\item \textbf{Figure 2 — Architecture Comparison}:
+Side-by-side diagrams of (a) GPU-only: KV cache in HBM, compute on GPU SMs; (b) Logic-die PIM: compute on separate die, data via TSVs; (c) Near-bank PIM: PE inside each bank, local row buffer.
+
+\item \textbf{Figure 3 — Near-Bank PIM Microarchitecture}:
+Zoomed-in diagram of a single PIM bank showing: DRAM array → sense amps → row buffer (2KB) → PE (MAC unit, $W$ bytes/cycle) → result register. Annotate bandwidth and latency values.
+
+\item \textbf{Figure 4 — System Overview}:
+High-level data flow: (1) Q broadcast to PIM banks → Q@K computation → partial scores; (2) Score reduction → softmax on GPU; (3) Score@V on GPU with dequantized V → output. Use colored arrows for different phases.
+
+\item \textbf{Figure 5 — Execution Timeline}:
+Gantt-style chart showing temporal overlap: GPU (QKV projection) $\parallel$ PIM (Q@K decomposed) → GPU (softmax) → GPU (score@V + output projection). Show both timelines with time axis.
+
+\item \textbf{Figure 6 — Asymmetric Quant Overhead}:
+Grouped bar chart comparing per-GEMV latency with and without asymmetric quantization for (a) FP16 PIM and (b) 2-bit PIM. Show rowbuffer time and PE time stacked.
+
+\item \textbf{Missing Data — Prefill Mode}:
+The current simulator has a known bug in prefill mode (KV cache initialization failure). Prefill experiments should be added once fixed, showing the amortization of asymmetric overhead at larger $M$.
+
+\item \textbf{Missing Data — Larger Models}:
+Experiments on larger models (Llama-2-70B, Llama-3-405B) would strengthen the scalability argument. The simulator supports these models but they were not run in the current evaluation.
+
+\item \textbf{Missing Data — End-to-End Throughput}:
+Token-level throughput (tokens/second) numbers should replace or supplement the current latency-only metrics to provide a more practical performance metric.
+
+\item \textbf{Missing References}:
+Several citations use placeholder keys (\texttt{kivi}, \texttt{duplex}, \texttt{newton2021newton}). These need to be populated with actual BibTeX entries.
+\end{enumerate}

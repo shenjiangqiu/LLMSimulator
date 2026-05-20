@@ -1,0 +1,72 @@
+\section{Background and Motivation}
+\label{sec:prelim}
+
+\subsection{Asymmetric Quantization for KV Cache}
+
+KV cache quantization reduces the storage footprint of attention keys and values by representing them in lower precision.
+Following \kivi{}~\citep{kivi}, we adopt asymmetric (affine) quantization, where each quantized value $\hat{x}$ maps to its float16 representation as:
+\begin{equation}
+x = s \cdot (\hat{x} - z)
+\label{eq:dequant}
+\end{equation}
+where $s$ is the per-channel (for keys) or per-token (for values) scale factor and $z$ is the zero-point.
+For 2-bit quantization, $\hat{x} \in \{0,1,2,3\}$, requiring only 0.25 bytes per element — an $8\times$ reduction from float16.
+
+\subsection{Decomposed Attention Dot Product}
+
+The attention score between query $Q$ and key $K_i$ is computed as the dot product $Q \cdot K_i = \sum_{j=1}^{d} q_j k_{ij}$.
+With asymmetric quantization, $q_j = s_Q(\hat{q}_j - z_Q)$ and $k_{ij} = s_K(\hat{k}_{ij} - z_K)$.
+Substituting and expanding:
+\begin{equation}
+\begin{aligned}
+Q \cdot K_i &= \sum_{j=1}^{d} s_Q(\hat{q}_j - z_Q) \cdot s_K(\hat{k}_{ij} - z_K) \\
+&= s_Q s_K \left[\sum_{j=1}^{d} \hat{q}_j \hat{k}_{ij} - z_K\sum_{j=1}^{d} \hat{q}_j - z_Q\sum_{j=1}^{d} \hat{k}_{ij} + d \cdot z_Q z_K\right]
+\end{aligned}
+\label{eq:full_expansion}
+\end{equation}
+
+This decomposition reveals \textbf{four distinct operations}:
+\begin{enumerate}
+\item \textbf{Main dot product}: $\sum \hat{q}_j \hat{k}_{ij}$ — a standard GEMV on 2-bit data.
+\item \textbf{Q-reduction}: $\sum \hat{q}_j$ — sum of query elements (computed once per query).
+\item \textbf{K-reduction}: $\sum \hat{k}_{ij}$ — sum of key elements (per key vector).
+\item \textbf{Constant term}: $d \cdot z_Q z_K$ — negligible.
+\end{enumerate}
+
+On GPU, these operations are typically fused into a single kernel.
+However, the reduction terms require additional floating-point operations that compete for GPU compute units.
+\textbf{Key observation}: operations (1)-(3) all operate on \emph{quantized 2-bit data}, which can be processed efficiently by simple near-memory compute units, while only the final scaling multiplication $s_Q s_K$ requires float16 precision.
+
+\subsection{Near-Bank Processing-in-Memory}
+
+Near-bank PIM places lightweight processing elements (PEs) inside each DRAM bank, directly adjacent to the memory arrays~\citep{seshadri2017ambit,mutlu2020processing}.
+Each bank has:
+\begin{itemize}
+\item A \textbf{row buffer} ($R$ bytes): data read from DRAM arrays in a single activation, serving as the PE's working memory.
+\item A \textbf{PE}: a simple multiply-accumulate unit processing $W$ bytes per cycle at frequency $f$.
+\item \textbf{Local bandwidth}: $B$ GB/s from DRAM array to row buffer per bank.
+\end{itemize}
+
+% TODO Figure 3: Near-bank PIM microarchitecture — DRAM array → row buffer → PE
+
+The total system aggregates $N$ such banks across multiple HBM stacks.
+For a representative HBM3E configuration with 8 stacks, each with 256 PIM-enabled banks, $N = 2048$ banks operate in parallel.
+Each bank processes its share of the data independently, with total latency determined by the slowest bank.
+
+The key advantage of near-bank PIM for quantized attention is the \textbf{data locality}: 2-bit KV data stays within the bank and is processed by the local PE, avoiding the costly data movement to GPU.
+The row-buffer pipeline naturally overlaps data movement with computation: while the PE computes on one row buffer's worth of data, the next row buffer fills from DRAM.
+
+\subsection{Limitations of Existing Approaches}
+
+\textbf{GPU-only execution}: \kivi{} demonstrates that asymmetric 2-bit quantization preserves accuracy, but the dequantization and reduction overhead on GPU limits throughput gains.
+With batch size 64 and 16K context, GPU spends significant cycles on the extra reduction terms in Eq.~\ref{eq:full_expansion}.
+
+\textbf{Logic-die PIM}: Prior work~\citep{duplex} places compute units on a separate logic die, requiring data to traverse TSVs from memory banks to logic die.
+This introduces bandwidth bottlenecks and additional latency, making it unsuitable for the fine-grained, bank-local operations needed by asymmetric quantized attention.
+
+\textbf{Direct 2-bit PIM compute}: While computing directly on 2-bit data in near-bank PIM is efficient, dequantizing first to float16 inside PIM (via $s \cdot (\hat{x} - z)$) incurs significant PE overhead.
+Our experiments show this dequantization adds $3\times$ PE time, doubling total Q@K latency.
+This motivates our approach of \emph{decomposing the asymmetric dot product} to keep as many operations as possible in the 2-bit domain.
+
+% TODO Table 1: Comparison of compute substrates — GPU vs logic-die PIM vs near-bank PIM
+% Columns: Compute throughput, memory bandwidth, 2-bit support, latency per GEMV

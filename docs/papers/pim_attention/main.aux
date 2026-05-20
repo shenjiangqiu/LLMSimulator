@@ -1,0 +1,84 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{gpt3,brown2020language}
+\citation{pope2023efficiently}
+\citation{pope2023efficiently}
+\citation{kivi}
+\citation{mutlu2020processing}
+\citation{duplex}
+\providecommand \oddpage@label [2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{eq:asym_dot}{{1}{1}{}{equation.1}{}}
+\newlabel{eq:asym_dot@cref}{{[equation][1][]1}{[1][1][]1}{}{}{}}
+\citation{kivi}
+\citation{seshadri2017ambit,mutlu2020processing}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Background and Motivation}{2}{section.2}\protected@file@percent }
+\newlabel{sec:prelim}{{2}{2}{}{section.2}{}}
+\newlabel{sec:prelim@cref}{{[section][2][]2}{[1][2][]2}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Asymmetric Quantization for KV Cache}{2}{subsection.2.1}\protected@file@percent }
+\newlabel{eq:dequant}{{2}{2}{}{equation.2}{}}
+\newlabel{eq:dequant@cref}{{[equation][2][]2}{[1][2][]2}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Decomposed Attention Dot Product}{2}{subsection.2.2}\protected@file@percent }
+\newlabel{eq:full_expansion}{{3}{2}{}{equation.3}{}}
+\newlabel{eq:full_expansion@cref}{{[equation][3][]3}{[1][2][]2}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Near-Bank Processing-in-Memory}{2}{subsection.2.3}\protected@file@percent }
+\citation{duplex}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Limitations of Existing Approaches}{3}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}\texttt  {PIM-Attn}{}: Heterogeneous Decomposed Attention}{3}{section.3}\protected@file@percent }
+\newlabel{sec:method}{{3}{3}{}{section.3}{}}
+\newlabel{sec:method@cref}{{[section][3][]3}{[1][3][]3}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Overview}{3}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Decomposed Q@K on Near-Bank PIM}{3}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}PIM Latency Model}{3}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Score@V on GPU}{3}{subsection.3.4}\protected@file@percent }
+\citation{duplex}
+\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces Per-Bank PIM GEMV Latency}}{4}{algocf.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{alg:pim}{{1}{4}{}{algocf.1}{}}
+\newlabel{alg:pim@cref}{{[algocf][1][]1}{[1][3][]4}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Heterogeneous Timeline}{4}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}KV Cache Quantization Overhead}{4}{subsection.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experimental Evaluation}{4}{section.4}\protected@file@percent }
+\newlabel{sec:experiment}{{4}{4}{}{section.4}{}}
+\newlabel{sec:experiment@cref}{{[section][4][]4}{[1][4][]4}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Experimental Setup}{4}{subsection.4.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Per-step attention latency breakdown ($\mu s$). All PIM experiments use 2048 banks.}}{4}{table.caption.2}\protected@file@percent }
+\newlabel{tab:main}{{1}{4}{Per-step attention latency breakdown ($\mu s$). All PIM experiments use 2048 banks}{table.caption.2}{}}
+\newlabel{tab:main@cref}{{[table][1][]1}{[1][4][]4}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Per-Step Attention Latency}{4}{subsection.4.2}\protected@file@percent }
+\citation{flexgen}
+\citation{h2o}
+\citation{zhao2024atom}
+\citation{kivi}
+\citation{seshadri2017ambit}
+\citation{newton2021newton}
+\citation{duplex}
+\citation{dao2022flashattention}
+\citation{mqa}
+\citation{gqa}
+\citation{dettmers2022llmint8}
+\citation{xiao2023smoothquant}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}PIM Cycle Verification}{5}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Asymmetric Quantization Overhead}{5}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}End-to-End Throughput}{5}{subsection.4.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces End-to-end latency ($\mu s$) for 128 steps $\times $ 32 layers.}}{5}{table.caption.3}\protected@file@percent }
+\newlabel{tab:e2e}{{2}{5}{End-to-end latency ($\mu s$) for 128 steps $\times $ 32 layers}{table.caption.3}{}}
+\newlabel{tab:e2e@cref}{{[table][2][]2}{[1][5][]5}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Related Work}{5}{section.5}\protected@file@percent }
+\newlabel{sec:related}{{5}{5}{}{section.5}{}}
+\newlabel{sec:related@cref}{{[section][5][]5}{[1][5][]5}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion and Future Work}{6}{section.6}\protected@file@percent }
+\newlabel{sec:conclusion}{{6}{6}{}{section.6}{}}
+\newlabel{sec:conclusion@cref}{{[section][6][]6}{[1][6][]6}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Appendix: Extended Results and Implementation Details}{6}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Complete Experiment Data}{6}{subsection.7.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Complete per-step attention latency ($\mu s$).}}{6}{table.caption.5}\protected@file@percent }
+\newlabel{tab:full}{{3}{6}{Complete per-step attention latency ($\mu s$)}{table.caption.5}{}}
+\newlabel{tab:full@cref}{{[table][3][]3}{[1][6][]6}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Simulator Configuration}{6}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Reproducibility}{6}{subsection.7.3}\protected@file@percent }
+\bibdata{ref}
+\bibstyle{icml2024}
+\gdef \@abspage@last{7}

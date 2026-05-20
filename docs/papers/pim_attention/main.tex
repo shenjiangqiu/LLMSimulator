@@ -1,0 +1,77 @@
+\documentclass{article}
+
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage[accepted]{icml2024}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+\usepackage[textsize=tiny]{todonotes}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{url}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{xcolor}
+\usepackage{wrapfig}
+\usepackage[colorlinks,linkcolor=magenta,filecolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage[capitalize,noabbrev]{cleveref}
+\usepackage{bbm}
+\usepackage[ruled]{algorithm2e}
+\usepackage{algpseudocode}
+\usepackage{authblk}
+\usepackage{thmtools,thm-restate}
+\usepackage{multirow}
+\usepackage{subcaption}
+\usepackage{pifont}
+\usepackage{makecell}
+\usepackage{multicol}
+\usepackage{enumitem}
+
+\newcommand{\pimattn}{\texttt{PIM-Attn}}
+\newcommand{\kivi}{\texttt{KiVI}}
+\interfootnotelinepenalty=10000
+\input{math_commands}
+
+\icmltitlerunning{\pimattn{}: Near-Bank PIM for Asymmetric Quantized Attention}
+
+\begin{document}
+
+\twocolumn[
+\icmltitle{\pimattn{}: Efficient Asymmetric Quantized Attention with Near-Bank Processing-in-Memory}
+
+\begin{icmlauthorlist}
+\icmlauthor{Anonymous Author}{anon}
+\end{icmlauthorlist}
+\icmlaffiliation{anon}{Anonymous Institution}
+\icmlcorrespondingauthor{Anonymous Author}{anon@example.com}
+
+\icmlkeywords{Machine Learning, ICML}
+
+\vskip 0.3in
+]
+
+\begin{abstract}
+Large Language Models (LLMs) face a critical memory bottleneck from their key-value (KV) cache during inference.
+While recent works like \kivi{} propose tuning-free asymmetric 2-bit quantization to dramatically reduce KV cache size, the dequantization overhead on GPU introduces significant latency.
+Existing near-bank processing-in-memory (PIM) solutions using logic-die architectures are insufficient for the mixed-precision operations required by asymmetric quantization.
+In this paper, we propose \pimattn{}, a heterogeneous attention framework that maps the decomposed asymmetric quantized attention operations onto near-bank PIM units.
+We decompose the asymmetric dot product $Q \cdot K \approx s_Q s_K[\sum \hat{q}\hat{k} - z_K\sum\hat{q} - z_Q\sum\hat{k} + d z_Q z_K]$ into multiple parallel reduction operations executed on efficient 2-bit near-bank compute units, while routing float16-intensive score-value ($S \cdot V$) operations to GPU.
+Our cycle-accurate simulator demonstrates that \pimattn{} achieves $1.4\times$--$2.0\times$ per-sequence latency improvement over GPU-only execution for quantized attention, with $2.1\mu s$ per-sequence Q@K latency on 2-bit KV using 2048 PIM banks.
+\end{abstract}
+
+\input{intro}
+\input{prelim}
+\input{method}
+\input{experiment}
+\input{related_work}
+\input{appendix}
+
+\bibliography{ref}
+\bibliographystyle{icml2024}
+
+\end{document}

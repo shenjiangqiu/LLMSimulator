@@ -1,0 +1,101 @@
+\section{\pimattn{}: Heterogeneous Decomposed Attention}
+\label{sec:method}
+
+\subsection{Overview}
+
+\pimattn{} adopts a heterogeneous execution model where different stages of asymmetric quantized attention are mapped to their optimal compute substrate.
+Figure~\ref{fig:overview} illustrates the overall architecture.
+
+% TODO Figure 4: System overview — Q@K(decomposed)→PIM, Softmax→GPU, Score@V→GPU, with data flow arrows
+
+The execution proceeds in three phases:
+\begin{enumerate}
+\item \textbf{Phase 1 (PIM)}: The decomposed Q@K dot product is computed on near-bank PIM units. The 2-bit KV cache data resides in PIM banks. Query $Q$ (float16) is broadcast to all banks. Each bank computes its portion of all four terms in Eq.~\ref{eq:full_expansion} using efficient 2-bit PEs.
+\item \textbf{Phase 2 (GPU)}: Partial results from all banks are reduced (via simple summation). Softmax is computed on GPU using the aggregated attention scores.
+\item \textbf{Phase 3 (GPU)}: The attention output is computed as $S \cdot V$, where $S$ is the float16 softmax output and $V$ is dequantized from 2-bit to float16 on GPU (leveraging GPU's massive float16 throughput).
+\end{enumerate}
+
+\subsection{Decomposed Q@K on Near-Bank PIM}
+
+The core innovation of \pimattn{} is mapping the decomposed asymmetric dot product (Eq.~\ref{eq:full_expansion}) onto near-bank PIM.
+For a query $Q \in \mathbb{R}^{M \times d}$ and key cache $K \in \mathbb{R}^{N \times d}$ (where $M=1$ in decode mode, $d$ is head dimension, $N$ is sequence length), each bank processes its partition of the data.
+
+\textbf{Data distribution}: The KV cache is striped across $N_{\text{banks}}$ PIM banks.
+Each bank holds a contiguous chunk of the $K$ and $V$ matrices along the sequence dimension.
+Query $Q$ is broadcast to all banks (cost modeled as additional row-buffer fill time).
+
+\textbf{Per-bank computation}: For its assigned chunk of $k_{\text{chunk}}$ key vectors, each bank computes:
+\begin{equation}
+\begin{aligned}
+\text{(a)} &\quad \sum_{j} \hat{q}_j \hat{k}_{ij} \quad \text{(2-bit MAC)} \\
+\text{(b)} &\quad \sum_{j} \hat{q}_j \quad \text{(2-bit accumulate, once per query)} \\
+\text{(c)} &\quad \sum_{j} \hat{k}_{ij} \quad \text{(2-bit accumulate, per key vector)} \\
+\text{(d)} &\quad \text{aggregate via Eq.~\ref{eq:full_expansion}}
+\end{aligned}
+\end{equation}
+
+Operations (a)-(c) all operate on 2-bit data, making them highly efficient on simple PIM PEs.
+The final float16 scaling by $s_Q s_K$ and subtraction of the constant term $d z_Q z_K$ are performed after reduction.
+
+\subsection{PIM Latency Model}
+
+We model the per-bank latency using a pipelined row-buffer execution model:
+
+\begin{algorithm}[t]
+\caption{Per-Bank PIM GEMV Latency}
+\label{alg:pim}
+\SetAlgoLined
+\KwIn{GEMV dimensions $M,K,N$, element size $e$ bytes, bank config}
+\KwOut{Latency breakdown (rowbuffer time, PE time)}
+
+$B_{\text{total}} \gets (MK + KN + MN) \cdot e$ \tcp{Total data movement}
+$B_{\text{bank}} \gets B_{\text{total}} / N_{\text{banks}}$
+
+$n_{\text{rb}} \gets \lceil B_{\text{bank}} / R \rceil$ \tcp{Row buffer fills}
+$t_{\text{fill}} \gets R / B$ \tcp{Time per fill}
+$T_{\text{rb}} \gets n_{\text{rb}} \cdot t_{\text{fill}}$
+
+$T_{\text{pe}} \gets B_{\text{bank}} / W \cdot \tau$ \tcp{PE compute time}
+
+\eIf{asymmetric quant enabled}{
+    $R_{\text{ops}} \gets (M+N) \cdot K$ \tcp{Reduction elements}
+    $T_{\text{red}} \gets R_{\text{ops}}/N_{\text{banks}} \cdot e / W \cdot \tau$
+    $T_{\text{pe}} \gets T_{\text{pe}} + T_{\text{red}}$
+}{}
+
+$T_{\text{latency}} \gets t_{\text{fill}} + \max((n_{\text{rb}}-1) \cdot t_{\text{fill}}, T_{\text{pe}})$
+\end{algorithm}
+
+Algorithm~\ref{alg:pim} captures the key insight that row-buffer fills and PE computation are pipelined: after filling the first row buffer, the PE begins computation while subsequent buffers fill from DRAM.
+The total latency is the first fill time plus the maximum of remaining fill time and total PE time.
+
+\subsection{Score@V on GPU}
+
+After Q@K and softmax produce float16 attention scores $S \in \mathbb{R}^{M \times N}$, the final output is $O = S \cdot V$.
+Since $S$ is float16 and $V$ must be dequantized from 2-bit, this operation is float16-intensive.
+We route this to GPU, which offers massive float16 throughput (989 TFLOPS for B100) that far exceeds what near-bank PEs can provide.
+
+For the dequantization of $V$, GPU reads 2-bit $V$ from memory, applies $v = s_V(\hat{v} - z_V)$, and computes the matrix multiply.
+This is efficiently handled by GPU tensor cores.
+
+\subsection{Heterogeneous Timeline}
+
+\pimattn{} models GPU and PIM as independent execution engines with separate timelines, advancing concurrently:
+\begin{equation}
+T_{\text{total}} = \max(T_{\text{PIM}}^{\text{QK}}, T_{\text{GPU}}^{\text{softmax}} + T_{\text{GPU}}^{\text{SV}})
+\end{equation}
+
+In practice, since Q@K on PIM and softmax+Score@V on GPU are sequential (softmax depends on Q@K output), the total latency is the sum.
+However, the \emph{per-layer} latency benefits from hiding PIM Q@K latency behind GPU projection operations (QKV projection, output projection), which execute concurrently on GPU while PIM processes attention.
+
+% TODO Figure 5: Execution timeline — GPU (QKV proj) || PIM (Q@K) → GPU (softmax+SV+O proj), showing overlap
+
+\subsection{KV Cache Quantization Overhead}
+
+In decode mode, each newly generated token produces new key and value vectors that must be quantized before appending to the KV cache.
+We model this quantization overhead on GPU:
+\begin{equation}
+T_{\text{quant}} = \max\left(\frac{2 \cdot d_{\text{kv}} \cdot B_{\text{elem}}}{\text{BW}_{\text{GPU}}}, \frac{4 \cdot d_{\text{kv}}}{\text{FLOPS}_{\text{GPU}}}\right)
+\end{equation}
+where $d_{\text{kv}} = n_{\text{kv\_heads}} \cdot d_{\text{head}}$ and the factor 4 accounts for 2 subtracts and 2 multiplies per element in asymmetric quantization.
+For Llama-3-8B ($d_{\text{kv}}=1024$), this overhead is $<0.01\mu s$ per token, negligible relative to attention computation.
