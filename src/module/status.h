@@ -29,6 +29,10 @@ struct ExecStatus {
   // PIM rowbuffer vs PE compute breakdown
   time_ns pim_rb_duration = 0.0;
   time_ns pim_pe_duration = 0.0;
+  time_ns pim_rb_qk = 0.0;
+  time_ns pim_pe_qk = 0.0;
+  time_ns pim_rb_sv = 0.0;
+  time_ns pim_pe_sv = 0.0;
 
   hw_metric flops = 0.0;
   hw_metric memory_size = 0.0;
@@ -63,6 +67,10 @@ struct ExecStatus {
     kv_quant_bytes += rhs.kv_quant_bytes;
     pim_rb_duration += rhs.pim_rb_duration;
     pim_pe_duration += rhs.pim_pe_duration;
+    pim_rb_qk += rhs.pim_rb_qk;
+    pim_pe_qk += rhs.pim_pe_qk;
+    pim_rb_sv += rhs.pim_rb_sv;
+    pim_pe_sv += rhs.pim_pe_sv;
     generic_read_cmd += rhs.generic_read_cmd;
     compute_pim_cmd += rhs.compute_pim_cmd;
     move_pim_cmd += rhs.compute_pim_cmd;
@@ -142,6 +150,10 @@ class StatusBoard {
   time_ns kv_quant_duration = 0.0;
   time_ns pim_rb_duration = 0.0;
   time_ns pim_pe_duration = 0.0;
+  time_ns pim_rb_qk = 0.0;
+  time_ns pim_pe_qk = 0.0;
+  time_ns pim_rb_sv = 0.0;
+  time_ns pim_pe_sv = 0.0;
 };
 
 }  // namespace llm_system

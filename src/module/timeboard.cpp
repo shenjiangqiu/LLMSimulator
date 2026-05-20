@@ -75,6 +75,10 @@ void TimeStamp::set_status(const StatusBoard& output_status) {
   status.kv_quant_duration = output_status.kv_quant_duration - status.kv_quant_duration;
   status.pim_rb_duration = output_status.pim_rb_duration - status.pim_rb_duration;
   status.pim_pe_duration = output_status.pim_pe_duration - status.pim_pe_duration;
+  status.pim_rb_qk = output_status.pim_rb_qk - status.pim_rb_qk;
+  status.pim_pe_qk = output_status.pim_pe_qk - status.pim_pe_qk;
+  status.pim_rb_sv = output_status.pim_rb_sv - status.pim_rb_sv;
+  status.pim_pe_sv = output_status.pim_pe_sv - status.pim_pe_sv;
 
   if (status.memory_size != 0) {
     status.opb = status.flops / status.memory_size;
@@ -263,6 +267,12 @@ void TimeStamp::print_util() {
   if (status.pim_rb_duration > 0 || status.pim_pe_duration > 0) {
     std::cout << " | pim_rb=" << status.pim_rb_duration / 1000.0
               << "us pim_pe=" << status.pim_pe_duration / 1000.0 << "us";
+  }
+  if (status.pim_rb_qk > 0 || status.pim_rb_sv > 0) {
+    std::cout << " | qk_rb=" << status.pim_rb_qk / 1000.0
+              << "us qk_pe=" << status.pim_pe_qk / 1000.0
+              << "us sv_rb=" << status.pim_rb_sv / 1000.0
+              << "us sv_pe=" << status.pim_pe_sv / 1000.0 << "us";
   }
 }
 

@@ -40,8 +40,9 @@ for f in files:
     gen_dur = gen['duration_us'] if gen else 0
     gen_proc = gen.get('processor', '?') if gen else '?'
     txt = f.replace('.json', '.txt')
-    qk = softmax = score_v = kv_quant = pim_rb = pim_pe = num_seq = 0.0
-    if os.path.exists(txt):
+     qk = softmax = score_v = kv_quant = pim_rb = pim_pe = num_seq = 0.0
+     qk_rb = qk_pe = sv_rb = sv_pe = 0.0
+     if os.path.exists(txt):
         with open(txt) as tf:
             for line in tf:
                 if 'AttentionGen' in line and 'qk=' in line:
@@ -54,6 +55,10 @@ for f in files:
                     m3 = re.search(r'pim_rb=([\d.]+)us pim_pe=([\d.]+)us', line)
                     if m3:
                         pim_rb = float(m3.group(1)); pim_pe = float(m3.group(2))
+                    m4 = re.search(r'qk_rb=([\d.]+)us qk_pe=([\d.]+)us sv_rb=([\d.]+)us sv_pe=([\d.]+)us', line)
+                    if m4:
+                        qk_rb = float(m4.group(1)); qk_pe = float(m4.group(2))
+                        sv_rb = float(m4.group(3)); sv_pe = float(m4.group(4))
                     break
     per_seq = qk / num_seq if num_seq > 0 else 0
     rows.append({
@@ -61,16 +66,17 @@ for f in files:
         'gen': gen_dur, 'proc': gen_proc, 'qk': qk, 'per_seq': per_seq,
         'softmax': softmax, 'score_v': score_v, 'kv_quant': kv_quant,
         'pim_rb': pim_rb, 'pim_pe': pim_pe,
+        'qk_rb': qk_rb, 'qk_pe': qk_pe, 'sv_rb': sv_rb, 'sv_pe': sv_pe,
     })
 
 # Markdown table
 lines = []
 lines.append('# Experiment Comparison Report')
 lines.append('')
-lines.append('| Experiment | Total(us) | Layer(us) | AttnGen(us) | Proc | Q@K(us) | per_seq | Softmax(us) | Score@V(us) | KVQuant(us) | pim_rb(us) | pim_pe(us) |')
-lines.append('|------------|-----------|-----------|-------------|------|---------|---------|-------------|-------------|-------------|------------|------------|')
+lines.append('| Experiment | Total(us) | Layer(us) | Gen(us) | Proc | Q@K(us) | per_seq | S@V(us) | qk_rb | qk_pe | sv_rb | sv_pe | pim_rb | pim_pe |')
+lines.append('|------------|-----------|-----------|---------|------|---------|---------|---------|-------|-------|-------|-------|--------|--------|')
 for r in rows:
-    lines.append(f'| {r[\"exp\"]:28s} | {r[\"total\"]:9.0f} | {r[\"layer\"]:9.0f} | {r[\"gen\"]:11.0f} | {r[\"proc\"]:4s} | {r[\"qk\"]:7.0f} | {r[\"per_seq\"]:7.1f} | {r[\"softmax\"]:11.3f} | {r[\"score_v\"]:11.0f} | {r[\"kv_quant\"]:11.3f} | {r[\"pim_rb\"]:10.0f} | {r[\"pim_pe\"]:10.0f} |')
+    lines.append(f'| {r[\"exp\"]:28s} | {r[\"total\"]:9.0f} | {r[\"layer\"]:9.0f} | {r[\"gen\"]:7.0f} | {r[\"proc\"]:4s} | {r[\"qk\"]:7.0f} | {r[\"per_seq\"]:7.1f} | {r[\"score_v\"]:7.0f} | {r[\"qk_rb\"]:5.0f} | {r[\"qk_pe\"]:5.0f} | {r[\"sv_rb\"]:5.0f} | {r[\"sv_pe\"]:5.0f} | {r[\"pim_rb\"]:6.0f} | {r[\"pim_pe\"]:6.0f} |')
 
 # PIM cycle verification
 for r in rows:

@@ -311,6 +311,10 @@ void TopModuleGraph::set_pop_status() {
 
   status.pim_rb_duration += exec_status.pim_rb_duration;
   status.pim_pe_duration += exec_status.pim_pe_duration;
+  status.pim_rb_qk += exec_status.pim_rb_qk;
+  status.pim_pe_qk += exec_status.pim_pe_qk;
+  status.pim_rb_sv += exec_status.pim_rb_sv;
+  status.pim_pe_sv += exec_status.pim_pe_sv;
 
   status.opb = exec_status.opb;
 }

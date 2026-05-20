@@ -351,6 +351,8 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
         accumul_memory_duration += gemv_result.rowbuffer_time_ns * attention_group_size;
         exec_status.pim_rb_duration += gemv_result.rowbuffer_time_ns * attention_group_size;
         exec_status.pim_pe_duration += gemv_result.pe_compute_time_ns * attention_group_size;
+        exec_status.pim_rb_qk += gemv_result.rowbuffer_time_ns * attention_group_size;
+        exec_status.pim_pe_qk += gemv_result.pe_compute_time_ns * attention_group_size;
       } else if (use_nearbank) {
         time_ns comp_dur = flops / gpu_compute_peak_flops * 1000 * 1000 * 1000;
         exec_status.compute_duration += comp_dur;
@@ -452,8 +454,9 @@ ExecStatus AttentionGenExecutionPIM(Device_Ptr device,
         ctx_memory_duration += gemv_result.rowbuffer_time_ns * attention_group_size;
         exec_status.pim_rb_duration += gemv_result.rowbuffer_time_ns * attention_group_size;
         exec_status.pim_pe_duration += gemv_result.pe_compute_time_ns * attention_group_size;
+        exec_status.pim_rb_sv += gemv_result.rowbuffer_time_ns * attention_group_size;
+        exec_status.pim_pe_sv += gemv_result.pe_compute_time_ns * attention_group_size;
       } else if (use_nearbank) {
-        // nearbank on but context on GPU
         time_ns comp_dur = flops / gpu_compute_peak_flops * 1000 * 1000 * 1000;
         ctx_compute_duration += comp_dur;
         time_ns mem_dur = memory_size / gpu_memory_bandwidth * 1000 * 1000 * 1000;
