@@ -1,3 +1,6 @@
 [submodule "src/dram/ramulator2"]
 	path = src/dram/ramulator2
 	url = https://github.com/shenjiangqiu/llmsimulator_ramulator.git
+[submodule "docs/papers/iccd26_template"]
+	path = docs/papers/iccd26_template
+	url = https://github.com/shenjiangqiu/project2-iccd26-kvcache.git

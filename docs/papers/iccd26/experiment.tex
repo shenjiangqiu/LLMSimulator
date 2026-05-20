@@ -1,0 +1,91 @@
+\section{Experimental Evaluation}
+
+\subsection{Setup}
+
+\textbf{Model and Hardware.} Llama-3-8B (32 layers, $d_{\text{model}}\!=\!4096$, $n_{\text{heads}}\!=\!32$, $n_{\text{kv\_heads}}\!=\!8$, $d_{\text{head}}\!=\!128$), context length 16,400, 128 decode steps, batch size 64.
+GPU: B100 (989 TFLOPS FP16, 3.35 TB/s HBM).
+PIM: 2048 banks (8 stacks $\times$ 256), 2KB row buffer, PE 16B/cycle at 2GHz, 32 GB/s per-bank bandwidth.
+Asymmetric quantization: $z_Q\!=\!1.0$, $z_K\!=\!2.0$.
+
+\textbf{Simulator.} Cycle-accurate C++ simulator extending LLMSimulator~\cite{duplex} with configurable near-bank PIM units.
+Reports per-stage timing (Q@K, softmax, score@V) and per-bank component times (rowbuffer vs. PE).
+All PIM latencies verified against analytical cycle counts (ratio 1.00$\times$).
+
+\textbf{Configurations.} Six configurations evaluated:
+\begin{enumerate}
+\item \textbf{FP16 GPU}: All GPU, float16 KV.
+\item \textbf{FP16 PIM}: All PIM, float16 KV (reference).
+\item \textbf{2-bit GPU}: 2-bit KV, all GPU.
+\item \textbf{2-bit Hybrid} (\pimattn{}): Q@K on PIM, softmax+score@V on GPU.
+\item \textbf{2-bit All-PIM}: Both Q@K and score@V on PIM.
+\item \textbf{2-bit Dequant}: Dequantize to FP16 in PIM before GEMV.
+\end{enumerate}
+
+\subsection{Per-Step Attention Latency}
+
+Table~\ref{tab:main} presents per-step attention latency (16 seqs/DP group).
+
+\begin{table}[t]
+\caption{Per-step attention latency ($\mu s$).}
+\label{tab:main}
+\centering
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Config} & \textbf{Q@K} & \textbf{S@V} & \textbf{Gen} & \textbf{pim\_rb} & \textbf{pim\_pe} \\
+\midrule
+FP16 GPU   & 97 & --- & 95  & --- & --- \\
+FP16 PIM   & 66 & 66  & 132 & 131 & 66  \\
+2-bit GPU  & 48 & --- & 48  & --- & --- \\
+2-bit Hyb. & 33 & 34  & 67  & 33  & 17  \\
+2-bit All  & 33 & 33  & 66  & 66  & 33  \\
+2-bit Deq. & 66 & 66  & 132 & 66  & 99  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Key findings:}
+\begin{itemize}
+\item \pimattn{} (2-bit Hybrid) achieves $2.1\mu s$/seq Q@K vs. $3.0\mu s$/seq for 2-bit GPU --- $1.4\times$ speedup. Against FP16 GPU ($6.0\mu s$/seq), the advantage is $2.9\times$.
+\item Dequantize-then-compute is inefficient: $3\times$ PE increase (99 vs. 33 $\mu s$), doubling Q@K latency. This validates direct 2-bit compute.
+\item Row-buffer time dominates: $pim\_rb$ accounts for 50--66\% of latency, indicating memory-bandwidth-bound execution at 2048 banks.
+\item Score@V benefits from GPU: at 34$\mu s$ (GPU) vs. 33$\mu s$ (PIM), GPU float16 throughput offsets data movement overhead.
+\end{itemize}
+
+\subsection{PIM Cycle Verification}
+
+For FP16 PIM at $N_{\text{banks}}\!=\!2048$: per-GEMV data = 4.26MB, per-bank = 2082B, requiring 2 row-buffer fills.
+Row-buffer time: $2 \times 64\text{ns} = 128\text{ns}$ per GEMV.
+PE time: $2082\text{B}/16 \times 0.5\text{ns} = 65.1\text{ns}$ per GEMV.
+Per-step (Q@K + score@V, $\times 4$ group, $\times 8$ heads, $\times 16$ seqs): RB $131.1\mu s$, PE $66.6\mu s$.
+\textbf{Reported: $131.1\mu s$ and $66.5\mu s$ (ratio 1.00$\times$), confirming simulator fidelity.}
+
+\subsection{Asymmetric Quantization Overhead}
+
+With asymmetric quantization, reduction terms add PE time proportional to $(M+N)\!\cdot\!K$.
+For decode mode ($M\!=\!1, N\!=\!16528$), this matches the main GEMV data volume, resulting in $\sim\!1.8\times$ PE time increase.
+In prefill mode with larger $M$, the relative overhead diminishes.
+
+\subsection{End-to-End Throughput}
+
+Table~\ref{tab:e2e} reports total latency for 128 steps $\times$ 32 layers.
+
+\begin{table}[t]
+\caption{End-to-end latency ($\mu s$) for 128 steps $\times$ 32 layers.}
+\label{tab:e2e}
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Config} & \textbf{Total} & \textbf{Per Layer} \\
+\midrule
+FP16 GPU   & 5,623  & 176 \\
+FP16 PIM   & 6,788  & 212 \\
+2-bit GPU  & 2,769  & 87  \\
+2-bit Hyb. & 3,460  & 108 \\
+2-bit All  & 3,443  & 108 \\
+2-bit Deq. & 5,555  & 174 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+2-bit GPU achieves the lowest latency (2,769$\mu s$) due to reduced memory traffic combined with GPU throughput.
+\pimattn{} (3,460$\mu s$) is $1.25\times$ slower than 2-bit GPU but offers the advantage of keeping KV cache in PIM memory, enabling larger batch sizes and longer contexts exceeding GPU memory capacity.

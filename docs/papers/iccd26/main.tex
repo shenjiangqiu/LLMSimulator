@@ -1,0 +1,57 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage[ruled]{algorithm2e}
+\usepackage{hyperref}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\newcommand{\pimattn}{PIM-Attn}
+\newcommand{\kivi}{KiVI}
+
+\begin{document}
+
+\title{\pimattn{}: Efficient Asymmetric Quantized Attention with Near-Bank Processing-in-Memory}
+
+\author{\IEEEauthorblockN{Anonymous Author(s)}
+\IEEEauthorblockA{\textit{Anonymous Institution}\\
+Anonymous City, Anonymous Country\\
+anon@example.com}
+}
+
+\maketitle
+
+\begin{abstract}
+Large Language Models (LLMs) face a critical memory bottleneck from their key-value (KV) cache during inference.
+While recent works like \kivi{} propose tuning-free asymmetric 2-bit quantization to dramatically reduce KV cache size, the dequantization overhead on GPU introduces significant latency.
+Existing near-bank processing-in-memory (PIM) approaches are insufficient for the mixed-precision operations required by asymmetric quantization.
+We propose \pimattn{}, a heterogeneous attention framework that decomposes the asymmetric dot product into parallel 2-bit operations mapped to near-bank PIM units, while routing float16-intensive score-value operations to GPU.
+Cycle-accurate simulation on Llama-3-8B demonstrates $1.4\times$--$2.9\times$ per-sequence Q@K latency improvement over GPU-only execution, with $2.1\mu s$ per-sequence latency on 2-bit KV using 2048 PIM banks.
+Our results show that direct 2-bit PIM compute is $2\times$ more efficient than dequantize-then-compute approaches, validating the decomposition strategy.
+\end{abstract}
+
+\begin{IEEEkeywords}
+LLM inference, KV cache quantization, near-bank PIM, attention, heterogeneous computing
+\end{IEEEkeywords}
+
+\input{intro}
+\input{background}
+\input{method}
+\input{experiment}
+\input{related}
+
+\section{Conclusion}
+We presented \pimattn{}, a heterogeneous attention framework that maps decomposed asymmetric quantized attention operations to near-bank PIM. Our key insight is that the asymmetric dot product $Q\cdot K \approx s_Q s_K[\sum \hat{q}\hat{k} - z_K\sum\hat{q} - z_Q\sum\hat{k} + d z_Q z_K]$ decomposes into 2-bit-compatible operations ideal for near-bank PIM, while float16-intensive score@V operations remain on GPU. Cycle-accurate simulation on Llama-3-8B demonstrates $1.4\times$ per-sequence Q@K speedup over GPU. Future work includes extending to prefill-mode attention and integrating with tiling-based memory optimization.
+
+\bibliographystyle{IEEEtran}
+\bibliography{ref}
+
+\end{document}

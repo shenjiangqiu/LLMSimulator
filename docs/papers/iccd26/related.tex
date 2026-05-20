@@ -1,0 +1,21 @@
+\section{Related Work}
+
+\textbf{KV Cache Quantization.} \kivi{}~\cite{kivi} is the first tuning-free asymmetric 2-bit quantization for KV cache.
+FlexGen~\cite{flexgen} and H2O~\cite{h2o} apply 4-bit round-to-nearest quantization.
+Atom~\cite{zhao2024atom} combines low-bit quantization with token-wise pruning.
+KVQuant~\cite{hooper2024kvquant} targets million-token contexts.
+Our work builds on \kivi{}'s asymmetric formulation but addresses the \emph{computational} challenge.
+
+\textbf{Processing-in-Memory for ML.} Ambit~\cite{seshadri2017ambit} demonstrates bulk bitwise DRAM operations.
+Newton~\cite{newton2021newton} proposes near-bank PIM for DNN training.
+Duplex~\cite{duplex} combines logic-die PIM with GPU for heterogeneous attention, but focuses on float16 operations without quantization support.
+\pimattn{} specifically targets quantized attention with 2-bit near-bank compute.
+
+\textbf{Attention Optimization.} FlashAttention~\cite{dao2022flashattention} reduces HBM accesses via tiling.
+Multi-query attention~\cite{mqa} and grouped-query attention~\cite{gqa} reduce KV heads.
+Our approach is orthogonal: we optimize the hardware mapping for quantized execution.
+
+\textbf{Mixed-Precision Inference.} LLM.int8()~\cite{dettmers2022llmint8} and SmoothQuant~\cite{xiao2023smoothquant} use mixed-precision for weights and activations.
+\pimattn{} introduces spatial heterogeneity across PIM and GPU for attention stages.
+
+To our knowledge, \pimattn{} is the first to: (1) decompose asymmetric quantized attention for PIM-GPU execution, (2) implement 2-bit near-bank compute for the decomposed operations, and (3) provide cycle-accurate analytical verification.
