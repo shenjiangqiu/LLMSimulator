@@ -12,7 +12,7 @@
 ## PIM Cycle Verification (exp2 FP16 PIM)
 
 - GEMV: M=1 K=128 N=16528 elem=2B, banks=2048, rb_fills=2
-- per-GEMV: rb=128.0ns pe=65.1ns
-- per-step (×4group ×8heads ×2dir ×16seqs): rb=131.1us pe=66.6us
+- Analytical per-GEMV: rb=128.0ns pe=65.1ns
+- Analytical per-step (×4group ×8heads ×2dir ×16seqs): rb=131.1us pe=66.6us
 - Reported: pim_rb=131.1us pim_pe=66.5us
-- ✓ RB ratio: 1.00x  PE ratio: 1.00x
+- RB ratio: 1.00x  PE ratio: 1.00x
